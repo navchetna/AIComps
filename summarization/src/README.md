@@ -88,6 +88,37 @@ uvicorn main:app --reload
 
 ---
 
+# Docker Deployment
+
+## Building as a Component
+For production deployments or component-based architectures, you can containerize the service:
+
+
+Build with proxy support (if needed)
+```bash
+cd summarization/src
+docker buildx build --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg https_proxy=$HTTPS_PROXY --build-arg http_proxy=$HTTP_PROXY -t summarization-service -f /path/to/your/Dockerfile .
+```
+Run the Container
+```bash
+docker run -d --name summarization-service -p 8000:8000 -e OPENAI_API_KEY=your_openai_api_key -e OPENAI_API_BASE=http://your.model.endpoint.com/v1 -e GROQ_API_KEY=your_groq_api_key -e HTTP_PROXY=$HTTP_PROXY -e HTTPS_PROXY=$HTTPS_PROXY -e https_proxy=$HTTPS_PROXY -e http_proxy=$HTTP_PROXY summarization-service
+```
+Container Management
+```bash
+# View logs
+docker logs summarization-service
+
+# Stop the service
+docker stop summarization-service
+
+# Remove the container
+docker rm summarization-service
+
+# Check container status
+docker ps -a | grep summarization-service
+```
+---
+
 ## API Reference
 
 ### `POST /summarize`
