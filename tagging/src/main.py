@@ -89,7 +89,7 @@ def call_groq_chat_completion(messages: List[Dict[str, str]], model: str) -> str
 app = FastAPI(
     title="Tagging Service",
     description="A FastAPI service that generates the most relevant tags from text using an LLM",
-    version="1.1.0",
+    version="1.3.0",
 )
 
 @app.post("/tags")
