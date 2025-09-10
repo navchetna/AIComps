@@ -92,38 +92,53 @@ app = FastAPI(
     version="1.3.0",
 )
 
-@app.post("/tags")
+@app.post("/tags", response_model=TaggingResponse)
 async def generate_tags(req: TaggingRequest):
     try:
         num_tags = req.num_tags or 5
-        default_prompt = """
-            You are an expert content analyzer. Fully understand the context of the provided text, then generate exactly N relevant tags that describe the content accurately. 
-            Each tag must satisfy the following rules:
-            
-            1. If a tag contains multiple words, join them with a hyphen (e.g., "Artificial Intelligence" -> "artificial-intelligence").
-            2. All tags MUST be in lowercase.
-            3. Ensure the tags are concise, highly relevant, and informative.
-            4. Make sure each tag consists of not more than 3 words, all in lowercase and are separated by hyphens.
-            All of the tags you generate must be in the JSON format shown below, within the "tags" array.
-            Example JSON output:
+        SYSTEM_PROMPT = """
+            You are an expert content analyzer.
+
+            Your task:
+            - Fully understand the context of the provided text.
+            - Generate exactly N relevant tags that describe the content accurately.
+
+            RULES:
+            1. Each tag must be concise and relevant.
+            2. All tags must be lowercase.
+            3. Multi-word tags must use hyphens (e.g., "artificial-intelligence").
+
+            RESPONSE FORMAT:
+            - Your entire output MUST be a single, valid JSON object.
+            - The JSON object must have a single key "tags".
+            - The value of "tags" MUST be a JSON array containing only STRINGS.
+            - DO NOT create an array of objects (e.g., [{"name": "tag"}]).
+
+            Example of the required format:
             {
-                "tags": ["artificial-intelligence", "industry-transformation", "ai-in-healthcare"]
+            "tags": [
+                "artificial-intelligence",
+                "5g-connectivity",
+                "llm-inference"
+            ]
             }
-            Anything other than this is NOT ALLOWED! They must be in lowercase and separated by hyphens if multi-word.
+            """
+
+        DEFAULT_TAGGING_PROMPT = """
+        Generate tags that reflect the **main themes and context** of the text.
         """
 
-
-        prompt = req.prompt or default_prompt
+        user_tagging_prompt = req.prompt or DEFAULT_TAGGING_PROMPT
 
         messages = [
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": f"Text: {req.text}\nGenerate exactly {num_tags} tags in the JSON format above."}
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": f"{user_tagging_prompt}\n\nText: {req.text}\nGenerate exactly {num_tags} tags."}
         ]
-
 
         if settings.openai_api_base and settings.openai_api_key:
             backend = "vLLM"
             result_json = call_openai_chat_completion(messages, settings.model_name)
+            print("OpenAI response:", result_json)
             model_used = settings.model_name
         else:
             backend = "groq"
