@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # OpenAI settings if hosted model is available
     openai_api_key: Optional[str] = None
     openai_api_base: Optional[str] = None
-    model_name: str = "gpt-4o-mini"
+    model_name: str = "meta-llama/Llama-3.1-8B-Instruct"
 
     # Groq if hosted model is not available
     groq_api_key: Optional[str] = None
