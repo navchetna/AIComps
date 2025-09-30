@@ -146,6 +146,24 @@ class SearchedMultimodalDoc(SearchedDoc):
     metadata: List[Dict[str, Any]]
 
 
+class LVMSearchedMultimodalDoc(SearchedMultimodalDoc):
+    max_new_tokens: conint(ge=0, le=1024) = 512
+    top_k: int = 10
+    top_p: float = 0.95
+    typical_p: float = 0.95
+    temperature: float = 0.01
+    stream: bool = False
+    repetition_penalty: float = 1.03
+    chat_template: Optional[str] = Field(
+        default=None,
+        description=(
+            "A template to use for this conversion. "
+            "If this is not passed, the model's default chat template will be "
+            "used instead. We recommend that the template contains {context} and {question} for multimodal-rag on videos."
+        ),
+    )
+
+
 class RerankedDoc(BaseDoc):
     reranked_docs: List[TextDoc]
     initial_query: str
@@ -498,6 +516,19 @@ class RAGASScores(BaseDoc):
     context_precision: float
 
 
+class GraphDoc(BaseDoc):
+    text: str
+    strtype: Optional[str] = Field(
+        description="type of input query, can be 'query', 'cypher', 'rag'",
+        default="query",
+    )
+    max_new_tokens: Optional[int] = Field(default=1024)
+    rag_index_name: Optional[str] = Field(default="rag")
+    rag_node_label: Optional[str] = Field(default="Task")
+    rag_text_node_properties: Optional[list] = Field(default=["name", "description", "status"])
+    rag_embedding_node_property: Optional[str] = Field(default="embedding")
+
+
 class LVMDoc(BaseDoc):
     image: Union[str, List[str]]
     prompt: str
@@ -516,6 +547,32 @@ class LVMVideoDoc(BaseDoc):
     chunk_duration: float
     prompt: str
     max_new_tokens: conint(ge=0, le=1024) = 512
+
+
+class SDInputs(BaseDoc):
+    prompt: str
+    num_inference_steps: int = 50
+    guidance_scale: float = 7.5
+    num_images_per_prompt: int = 1
+    seed: int = 42
+    negative_prompt: Optional[Union[str, List[str]]] = None
+    height: Optional[int] = None
+    width: Optional[int] = None
+    lora_weight_name_or_path: Optional[str] = None
+
+
+class SDImg2ImgInputs(BaseDoc):
+    image: str
+    prompt: Union[str, List[str]] = None
+    height: Optional[int] = None
+    width: Optional[int] = None
+    strength: float = 0.8
+    num_inference_steps: Optional[int] = 50
+    guidance_scale: Optional[float] = 7.5
+    negative_prompt: Optional[Union[str, List[str]]] = None
+    num_images_per_prompt: int = 1
+    seed: int = 42
+    lora_weight_name_or_path: Optional[str] = None
 
 
 class SDOutputs(BaseDoc):
