@@ -71,14 +71,9 @@ export LD_PRELOAD=/lib/x86_64-linux-gnu/libtcmalloc.so.4
 ```
 
 ### 9. Expose this as an API
-Install the requirements
-```bash
-uv pip install -r requirements.txt
-```
-
 Start the application
 ```bash
-marker_server
+marker_server --host=0.0.0.0 --port=8000
 ```
 
 Send a curl request (new terminal)
