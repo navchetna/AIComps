@@ -6,8 +6,9 @@ import os
 def extract_markdown_and_images(json_file_path):
     with open(json_file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
+    content = data
 
-    if "content" not in data or len(data["content"]) == 0:
+    if len(data) == 0:
         return False
 
     base_name = os.path.splitext(os.path.basename(json_file_path))[0]
@@ -15,8 +16,8 @@ def extract_markdown_and_images(json_file_path):
     os.makedirs(output_dir, exist_ok=True)
     md_file_path = os.path.join(output_dir, 'output.md')
 
-    content = data["content"][0]
-    markdown = content.get("markdown", "")
+    print(len(data))
+    markdown = content.get("output", "")
     images_dict = content.get("images", {})
 
     image_refs = re.findall(r"!\[\]\((_page_[^\)]+)\)", markdown)

@@ -78,10 +78,10 @@ uv pip install -r requirements.txt
 
 Start the application
 ```bash
-uvicorn main:app
+marker_server
 ```
 
-Send a curl request
+Send a curl request (new terminal)
 ```bash
 curl -X POST "http://localhost:8000/convert-pdf-to-json" -F "file=@/path/to/pdf" -o output.json
 ```
