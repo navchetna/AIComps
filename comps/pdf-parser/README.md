@@ -78,9 +78,8 @@ marker_server --host=0.0.0.0 --port=8000
 
 Send a curl request (new terminal)
 ```bash
-curl -X POST "http://localhost:8000/convert-pdf-to-json" -F "file=@/path/to/pdf" -o output.json
+curl -X POST "http://localhost:8000/marker/upload" -F "file=@/path/to/pdf" -F "user=<your_name>"
 ```
-The output will be saved to 'output.json'
 
 Example script to convert the API response into markdown:
 > You need to update the file path within the script (could be coverted to cli arg)
