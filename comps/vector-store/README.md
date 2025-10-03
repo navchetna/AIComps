@@ -1,168 +1,86 @@
-# Qdrant Vector Store with LangChain
+# Qdrant Instance Manager - Quick Start
 
-A complete example demonstrating how to use **Qdrant** as a vector store with **LangChain** and **HuggingFace embeddings**. This implementation provides a simple yet powerful way to perform semantic similarity searches on your text data.
+A simple API service that creates personal Qdrant vector database instances for each user.
 
-## Overview
+## Creating Your Instance
 
-This project includes a Python script that:
-- Connects to a local Qdrant instance
-- Creates and manages vector collections
-- Generates embeddings using HuggingFace models
-- Performs similarity searches on stored documents
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- **Python 3.10+**
-- **Docker** (for running Qdrant locally)
-- **uv** (Python package manager)
-
-## Quick Start
-
-### Step 1: Start Qdrant with Docker
-
-Launch a local Qdrant instance using Docker:
+To create your personal Qdrant instance, make a POST request with your username:
 
 ```bash
-# Pull and run Qdrant
-docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+curl -X POST "http://localhost:8060/create_instance?user=YOUR_USERNAME" | jq
 ```
 
-For a detached mode (runs in background):
+**Example response:**
+```json
+{
+  "user": "john",
+  "ip": "127.0.0.1",
+  "port": 49152,
+  "ttl": 600
+}
+```
+
+## Important Information
+
+### Save Your Port Number!
+
+**The `port` number in the response is your personal database connection.** You'll need this port to connect to your Qdrant instance.
+
+✅ **Write it down or save it somewhere**  
+✅ **Use this port for all your database operations**
+
+### Instance Lifetime
+
+- Your instance will remain active for **10 minutes (600 seconds)**
+- After 10 minutes of inactivity, the instance will be automatically cleaned up
+- You can create a new instance anytime using the same username
+
+### Re-creating an Instance
+
+If you make another request with the same username while your instance is still active:
 
 ```bash
-docker run -d -p 6333:6333 -p 6334:6334 --name qdrant qdrant/qdrant
+curl -X POST "http://localhost:8000/create_instance?user=john"
 ```
 
-**Port Configuration:**
-- `6333` - HTTP API endpoint
-- `6334` - gRPC API endpoint
-
-**Verify Installation:**
-
-```bash
-curl http://localhost:6333/collections
+**Response:**
+```json
+{
+  "message": "Instance already exists for john",
+  "user": "john",
+  "ip": "127.0.0.1",
+  "port": 49152,
+  "ttl": 423
+}
 ```
 
-You should receive an empty collection list `{"result": {"collections": []}}` if this is a fresh installation.
+The `ttl` field shows how many seconds remain before your instance expires.
 
-### Step 2: Set Up Python Environment
+## Connecting to Your Instance
 
-Create and activate a virtual environment (recommended):
-
-```bash
-# Create virtual environment
-uv venv --python=3.12
-# Activate the env
-source .venv/bin/activate
-```
-
-Install required dependencies:
-
-```bash
-uv pip install -r requirements.txt
-```
-
-### Step 3: Run the Example Script
-
-Execute the main script:
-
-```bash
-python3 main.py
-```
-
-
-## How It Works
-
-The script performs the following operations:
-
-1. **Connects** to the local Qdrant instance at `http://localhost:6333`
-2. **Creates** a collection named `test_vectors` (if it doesn't exist)
-3. **Initializes** embeddings using the `sentence-transformers/all-MiniLM-L6-v2` model
-4. **Adds** sample texts to the vector store
-5. **Executes** a similarity search query
-
-### Expected Output
+Once you have your port number, you can connect to your Qdrant instance at:
 
 ```
-Collection 'test_vectors' created!
-Added 4 texts to the vector store.
-
-Top results for query: Test embeddings
-1: I am testing embeddings
-2: This is a test document
+http://127.0.0.1:YOUR_PORT
 ```
 
-## Customization
+**Example:**
+If your port is `49152`, connect to: `http://127.0.0.1:49152`
 
-### Changing the Embedding Model
+You can use this connection string with:
+- Qdrant client libraries
+- HTTP requests
+- The Qdrant web UI (if exposed)
 
-The default model uses **384-dimensional vectors**. To use a different model:
+## Quick Reference
 
-1. Update the model name in the script
-2. Adjust the collection vector size accordingly
-3. Ensure the model is compatible with `sentence-transformers`
-
-### Adding Your Own Data
-
-Modify the `texts` variable in `main.py`:
-
-```python
-texts = [
-    "Your first document",
-    "Your second document",
-    "Your third document"
-]
-```
-
-## Docker Management
-
-### Stop Qdrant Container
-
-```bash
-docker stop qdrant
-```
-
-### Restart Qdrant Container
-
-```bash
-docker start qdrant
-```
-
-### Remove Qdrant Container
-
-```bash
-docker rm -f qdrant
-```
-
-### View Qdrant Logs
-
-```bash
-docker logs qdrant
-```
-
-## Additional Resources
-
-- [Qdrant Documentation](https://qdrant.tech/documentation/)
-- [LangChain Documentation](https://python.langchain.com/docs/get_started/introduction)
-- [HuggingFace Sentence Transformers](https://huggingface.co/sentence-transformers)
-
-## Troubleshooting
-
-**Issue:** Connection refused to Qdrant
-- **Solution:** Ensure Qdrant container is running with `docker ps`
-
-**Issue:** Module import errors
-- **Solution:** Verify all dependencies are installed with `pip list`
-
-**Issue:** Out of memory errors
-- **Solution:** Consider using a smaller embedding model or increasing Docker memory limits
-
-## License
-
-This project is provided as-is for educational and development purposes.
+| Field | Description |
+|-------|-------------|
+| `user` | Your username |
+| `ip` | Always `127.0.0.1` (localhost) |
+| `port` | **Your personal database port - SAVE THIS!** |
+| `ttl` | Time remaining before instance expires (seconds) |
 
 ---
 
-**Happy Vector Searching! 🔍**
+**Remember:** Keep your port number handy - you'll need it to work with your database!
