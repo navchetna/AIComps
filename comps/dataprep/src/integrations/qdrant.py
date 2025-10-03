@@ -76,7 +76,6 @@ class OpeaQdrantDataprep(OpeaComponent):
         if not health_status:
             logger.error("OpeaQdrantDataprep health check failed.")
 
-        self.tree_parser = TreeParser()
 
     def check_health(self) -> bool:
         """Checks the health of the Qdrant service."""
@@ -140,7 +139,7 @@ class OpeaQdrantDataprep(OpeaComponent):
         if use_model_param and model_name:
             data["model"] = model_name
         else:
-            data["file_name"] = ""
+            data["filename"] = ""
 
         response = requests.post(url, headers=headers, json=data)
         response_data = json.loads(response.text)
@@ -185,7 +184,7 @@ class OpeaQdrantDataprep(OpeaComponent):
         
         return node_chunks
 
-    async def ingest_data_to_qdrant(self, json_tree_path: str, collection_name: str, chunk_size: int = 2000, chunk_overlap: int = 200):
+    async def ingest_data_to_qdrant(self, json_tree_path: str, collection_name: str, user: str, filename: str, chunk_size: int = 2000, chunk_overlap: int = 200):
         """Ingest document to Qdrant using JSON tree parsing logic."""
         if logflag:
             logger.info(f"Parsing JSON {json_tree_path} for collection {collection_name}.")
@@ -219,11 +218,13 @@ class OpeaQdrantDataprep(OpeaComponent):
         num_chunks = len(chunks)
         for i in range(0, num_chunks, batch_size):
             batch_chunks = chunks[i : i + batch_size]
+            metadatas = [{"user": user, "filename": filename} for _ in batch_chunks]
             batch_texts = batch_chunks
 
             _ = Qdrant.from_texts(
                 texts=batch_texts,
                 embedding=self.embedder,
+                metadatas=metadatas,
                 collection_name=collection_name,
                 host=QDRANT_HOST,
                 port=QDRANT_PORT,
@@ -233,103 +234,161 @@ class OpeaQdrantDataprep(OpeaComponent):
 
         return True
 
+    # async def ingest_files(
+    #     self,
+    #     input: DataprepRequest,
+    #     collection_name: Optional[str] = DEFAULT_COLLECTION_NAME,
+    # ):
+    #     """Ingest files/links content into qdrant database.
+
+    #     Save in the format of vector[768].
+    #     Returns '{"status": 200, "message": "Data preparation succeeded"}' if successful.
+    #     Args:
+    #         input (DataprepRequest): Model containing the following parameters:
+    #             files (Union[UploadFile, List[UploadFile]], optional): A file or a list of files to be ingested. Defaults to File(None).
+    #             link_list (str, optional): A list of links to be ingested. Defaults to Form(None).
+    #             chunk_size (int, optional): The size of the chunks to be split. Defaults to Form(1500).
+    #             chunk_overlap (int, optional): The overlap between chunks. Defaults to Form(100).
+    #             process_table (bool, optional): Whether to process tables in PDFs. Defaults to Form(False).
+    #             table_strategy (str, optional): The strategy to process tables in PDFs. Defaults to Form("fast").
+    #             collection_name (Optional[str]): The Qdrant collection to ingest into. Defaults to env var COLLECTION_NAME.
+    #     """
+    #     # files = input.files
+    #     link_list = input.link_list
+    #     chunk_size = input.chunk_size
+    #     chunk_overlap = input.chunk_overlap
+    #     process_table = input.process_table
+    #     table_strategy = input.table_strategy
+
+    #     if logflag:
+    #         logger.info(f"files:{files}")
+    #         logger.info(f"link_list:{link_list}")
+    #         logger.info(f"Ingesting into collection: {collection_name}")
+
+    #     if files:
+    #         if not isinstance(files, list):
+    #             files = [files]
+    #         uploaded_files = []
+    #         for file in files:
+    #             encode_file = encode_filename(file.filename)
+    #             save_path = self.upload_folder + encode_file
+    #             await save_content_to_local_disk(save_path, file)
+    #             if save_path.endswith('.json'):
+    #                 await self.ingest_data_to_qdrant(
+    #                     json_tree_path=save_path,
+    #                     collection_name=collection_name,
+    #                     chunk_size=chunk_size,
+    #                     chunk_overlap=chunk_overlap
+    #                 )
+    #             else:
+    #                 await self.ingest_data_to_qdrant(
+    #                     DocPath(
+    #                         path=save_path,
+    #                         chunk_size=chunk_size,
+    #                         chunk_overlap=chunk_overlap,
+    #                         process_table=process_table,
+    #                         table_strategy=table_strategy,
+    #                     ),
+    #                     collection_name=collection_name,
+    #                 )
+    #             uploaded_files.append(save_path)
+    #             if logflag:
+    #                 logger.info(f"Successfully saved file {save_path} to collection {collection_name}")
+    #         result = {"status": 200, "message": "Data preparation succeeded"}
+    #         if logflag:
+    #             logger.info(result)
+    #         return result
+
+    #     if link_list:
+    #         link_list = json.loads(link_list)
+    #         if not isinstance(link_list, list):
+    #             raise HTTPException(status_code=400, detail="link_list should be a list.")
+    #         for link in link_list:
+    #             encoded_link = encode_filename(link)
+    #             save_path = self.upload_folder + encoded_link + ".txt"
+    #             content = parse_html_new([link], chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    #             try:
+    #                 await save_content_to_local_disk(save_path, content)
+    #                 await self.ingest_data_to_qdrant(
+    #                     DocPath(
+    #                         path=save_path,
+    #                         chunk_size=chunk_size,
+    #                         chunk_overlap=chunk_overlap,
+    #                         process_table=process_table,
+    #                         table_strategy=table_strategy,
+    #                     ),
+    #                     collection_name=collection_name,
+    #                 )
+    #             except json.JSONDecodeError:
+    #                 raise HTTPException(status_code=500, detail="Fail to ingest data into qdrant.")
+
+    #             if logflag:
+    #                 logger.info(f"Successfully saved link {link} to collection {collection_name}")
+
+    #         result = {"status": 200, "message": "Data preparation succeeded"}
+    #         if logflag:
+    #             logger.info(result)
+    #         return result
+
+    #     raise HTTPException(status_code=400, detail="Must provide either a file or a string list.")
+    
+    def extract_filename(self, filename: str) -> str:
+        """Extracts the base filename without extensions."""
+        parts = filename.split('.')
+        if len(parts) > 1:
+            return '.'.join(parts[:-1])
+        return filename
+
     async def ingest_files(
         self,
         input: DataprepRequest,
         collection_name: Optional[str] = DEFAULT_COLLECTION_NAME,
     ):
-        """Ingest files/links content into qdrant database.
+        """Ingest content from user's outputs folder into Qdrant database.
 
-        Save in the format of vector[768].
+        Requires 'user' and 'filename' in input. Constructs path to output_tree.json and ingests it.
         Returns '{"status": 200, "message": "Data preparation succeeded"}' if successful.
         Args:
-            input (DataprepRequest): Model containing the following parameters:
-                files (Union[UploadFile, List[UploadFile]], optional): A file or a list of files to be ingested. Defaults to File(None).
-                link_list (str, optional): A list of links to be ingested. Defaults to Form(None).
-                chunk_size (int, optional): The size of the chunks to be split. Defaults to Form(1500).
-                chunk_overlap (int, optional): The overlap between chunks. Defaults to Form(100).
-                process_table (bool, optional): Whether to process tables in PDFs. Defaults to Form(False).
-                table_strategy (str, optional): The strategy to process tables in PDFs. Defaults to Form("fast").
-                collection_name (Optional[str]): The Qdrant collection to ingest into. Defaults to env var COLLECTION_NAME.
+            input (DataprepRequest): Model containing parameters including user (str), filename (str), etc.
+            collection_name (Optional[str]): The Qdrant collection to ingest into. Defaults to env var COLLECTION_NAME.
         """
-        files = input.files
-        link_list = input.link_list
+        user = input.user
+        filename = input.filename
         chunk_size = input.chunk_size
         chunk_overlap = input.chunk_overlap
         process_table = input.process_table
         table_strategy = input.table_strategy
 
+        if not user or not filename:
+            raise HTTPException(status_code=400, detail="Must provide both user and filename.")
+
+        filename = self.extract_filename(filename)
+
+        folder_path = os.path.join('.', user, 'outputs', filename)
+        json_tree_path = os.path.join(folder_path, 'output_tree.json')
+
+        if not os.path.exists(json_tree_path):
+            raise HTTPException(
+                status_code=404,
+                detail="output_tree.json does not exist. Please parse the PDF to generate a markdown."
+            )
+
         if logflag:
-            logger.info(f"files:{files}")
-            logger.info(f"link_list:{link_list}")
-            logger.info(f"Ingesting into collection: {collection_name}")
+            logger.info(f"Ingesting {json_tree_path} into collection: {collection_name}")
 
-        if files:
-            if not isinstance(files, list):
-                files = [files]
-            uploaded_files = []
-            for file in files:
-                encode_file = encode_filename(file.filename)
-                save_path = self.upload_folder + encode_file
-                await save_content_to_local_disk(save_path, file)
-                if save_path.endswith('.json'):
-                    await self.ingest_data_to_qdrant(
-                        json_tree_path=save_path,
-                        collection_name=collection_name,
-                        chunk_size=chunk_size,
-                        chunk_overlap=chunk_overlap
-                    )
-                else:
-                    await self.ingest_data_to_qdrant(
-                        DocPath(
-                            path=save_path,
-                            chunk_size=chunk_size,
-                            chunk_overlap=chunk_overlap,
-                            process_table=process_table,
-                            table_strategy=table_strategy,
-                        ),
-                        collection_name=collection_name,
-                    )
-                uploaded_files.append(save_path)
-                if logflag:
-                    logger.info(f"Successfully saved file {save_path} to collection {collection_name}")
-            result = {"status": 200, "message": "Data preparation succeeded"}
-            if logflag:
-                logger.info(result)
-            return result
+        await self.ingest_data_to_qdrant(
+            json_tree_path=json_tree_path,
+            collection_name=collection_name,
+            user=user,
+            filename=filename,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap
+        )
 
-        if link_list:
-            link_list = json.loads(link_list)
-            if not isinstance(link_list, list):
-                raise HTTPException(status_code=400, detail="link_list should be a list.")
-            for link in link_list:
-                encoded_link = encode_filename(link)
-                save_path = self.upload_folder + encoded_link + ".txt"
-                content = parse_html_new([link], chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-                try:
-                    await save_content_to_local_disk(save_path, content)
-                    await self.ingest_data_to_qdrant(
-                        DocPath(
-                            path=save_path,
-                            chunk_size=chunk_size,
-                            chunk_overlap=chunk_overlap,
-                            process_table=process_table,
-                            table_strategy=table_strategy,
-                        ),
-                        collection_name=collection_name,
-                    )
-                except json.JSONDecodeError:
-                    raise HTTPException(status_code=500, detail="Fail to ingest data into qdrant.")
-
-                if logflag:
-                    logger.info(f"Successfully saved link {link} to collection {collection_name}")
-
-            result = {"status": 200, "message": "Data preparation succeeded"}
-            if logflag:
-                logger.info(result)
-            return result
-
-        raise HTTPException(status_code=400, detail="Must provide either a file or a string list.")
+        result = {"status": 200, "message": "Data preparation succeeded"}
+        if logflag:
+            logger.info(result)
+        return result
 
     async def get_files(self, collection_name: Optional[str] = DEFAULT_COLLECTION_NAME):
         """Get file structure from Qdrant collection in the format of

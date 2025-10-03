@@ -38,9 +38,19 @@ loader = OpeaDataprepLoader(
 
 async def resolve_dataprep_request(request: Request):
     form = await request.form()
+    
+    user = form.get("user")
+    if not user:
+        raise HTTPException(status_code=400, detail="Missing required 'user' field.")
+
+    filename = form.get("filename")
+    if not filename:
+        raise HTTPException(status_code=400, detail="Missing required 'filename' field.")
 
     common_args = {
-        "files": form.get("files", None),
+        "user": user,
+        "filename": filename,
+        # "files": form.get("files", None),
         "link_list": form.get("link_list", None),
         "chunk_size": form.get("chunk_size", 2000),
         "chunk_overlap": form.get("chunk_overlap", 200),

@@ -83,13 +83,17 @@ class TokenCheckResponse(BaseModel):
 class DataprepRequest:
     def __init__(
         self,
+        user: str = Form(...),
+        filename: str = Form(...),
         files: Optional[Union[UploadFile, List[UploadFile]]] = File(None),
         link_list: Optional[str] = Form(None),
-        chunk_size: Optional[int] = Form(1500),
-        chunk_overlap: Optional[int] = Form(100),
+        chunk_size: Optional[int] = Form(2000),
+        chunk_overlap: Optional[int] = Form(200),
         process_table: Optional[bool] = Form(False),
         table_strategy: Optional[str] = Form("fast"),
     ):
+        self.user = user
+        self.filename = filename
         self.files = files
         self.link_list = link_list
         self.chunk_size = chunk_size
@@ -192,6 +196,8 @@ class ArangoDBDataprepRequest(DataprepRequest):
 class QdrantDataprepRequest(DataprepRequest):
     def __init__(
         self,
+        user: str = Form(...),
+        filename: str = Form(...),
         files: Optional[Union[UploadFile, List[UploadFile]]] = File(None),
         link_list: Optional[str] = Form(None),
         chunk_size: Optional[int] = Form(1500),
@@ -201,6 +207,8 @@ class QdrantDataprepRequest(DataprepRequest):
         collection_name: Optional[str] = Form("rag-qdrant"),
     ):
         super().__init__(
+            user=user,
+            filename=filename,
             files=files,
             link_list=link_list,
             chunk_size=chunk_size,
