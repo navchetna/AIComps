@@ -85,6 +85,8 @@ class DataprepRequest:
         self,
         user: str = Form(...),
         filename: str = Form(...),
+        qdrant_host: str = Form("localhost"),
+        qdrant_port: int = Form(6333),
         files: Optional[Union[UploadFile, List[UploadFile]]] = File(None),
         link_list: Optional[str] = Form(None),
         chunk_size: Optional[int] = Form(2000),
@@ -94,6 +96,8 @@ class DataprepRequest:
     ):
         self.user = user
         self.filename = filename
+        self.qdrant_host = qdrant_host
+        self.qdrant_port = qdrant_port
         self.files = files
         self.link_list = link_list
         self.chunk_size = chunk_size
@@ -198,6 +202,8 @@ class QdrantDataprepRequest(DataprepRequest):
         self,
         user: str = Form(...),
         filename: str = Form(...),
+        qdrant_host: str = Form("localhost"),
+        qdrant_port: int = Form(6333),
         files: Optional[Union[UploadFile, List[UploadFile]]] = File(None),
         link_list: Optional[str] = Form(None),
         chunk_size: Optional[int] = Form(1500),
@@ -209,6 +215,8 @@ class QdrantDataprepRequest(DataprepRequest):
         super().__init__(
             user=user,
             filename=filename,
+            qdrant_host=qdrant_host,
+            qdrant_port=qdrant_port,
             files=files,
             link_list=link_list,
             chunk_size=chunk_size,

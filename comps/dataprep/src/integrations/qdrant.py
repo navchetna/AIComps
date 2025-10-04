@@ -1,6 +1,9 @@
-# Copyright (C) 2024 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
+import json
+import os
+from typing import List, Optional, Union
 
+from fastapi import Body, HTTPException
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import json
 import os
 from typing import List, Optional, Union
@@ -33,16 +36,13 @@ logflag = os.getenv("LOGFLAG", False)
 # Embedding model
 EMBED_MODEL = os.getenv("EMBED_MODEL", "BAAI/bge-base-en-v1.5")
 
-# Qdrant configuration
-QDRANT_HOST = os.getenv("QDRANT_HOST", "localhost")
-QDRANT_PORT = int(os.getenv("QDRANT_PORT", 6333))
-DEFAULT_COLLECTION_NAME = os.getenv("COLLECTION_NAME", "rag-qdrant")
-
 # LLM/Embedding endpoints
 TGI_LLM_ENDPOINT = os.getenv("TGI_LLM_ENDPOINT", "http://localhost:8080")
 TGI_LLM_ENDPOINT_NO_RAG = os.getenv("TGI_LLM_ENDPOINT_NO_RAG", "http://localhost:8081")
 TEI_EMBEDDING_ENDPOINT = os.getenv("TEI_EMBEDDING_ENDPOINT", "")
 HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN", "")
+
+DEFAULT_COLLECTION_NAME = os.getenv("COLLECTION_NAME", "rag-qdrant")
 
 @OpeaComponentRegistry.register("OPEA_DATAPREP_QDRANT")
 class OpeaQdrantDataprep(OpeaComponent):
@@ -71,20 +71,22 @@ class OpeaQdrantDataprep(OpeaComponent):
         else:
             self.embedder = HuggingFaceEmbeddings(model_name=EMBED_MODEL)
 
-        self.client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
-        health_status = self.check_health()
-        if not health_status:
-            logger.error("OpeaQdrantDataprep health check failed.")
+        self.client = None
 
+    def create_qdrant_client(self, host, port):
+        """Create a Qdrant client instance with the given host and port."""
+        from qdrant_client import QdrantClient
+        self.client = QdrantClient(host=host, port=port)
 
-    def check_health(self) -> bool:
+    def check_health(self, host, port) -> bool:
         """Checks the health of the Qdrant service."""
         if self.embedder is None:
             logger.error("Qdrant embedder is not initialized.")
             return False
 
         try:
-            logger.info(self.client.get_info())
+            client = QdrantClient(host=host, port=port)
+            logger.info(client.info())
             return True
         except Exception as e:
             logger.error(f"Qdrant health check failed: {e}")
@@ -184,8 +186,11 @@ class OpeaQdrantDataprep(OpeaComponent):
         
         return node_chunks
 
-    async def ingest_data_to_qdrant(self, json_tree_path: str, collection_name: str, user: str, filename: str, chunk_size: int = 2000, chunk_overlap: int = 200):
+    async def ingest_data_to_qdrant(self, json_tree_path: str, collection_name: str, user: str, filename: str, chunk_size: int = 2000, chunk_overlap: int = 200, qdrant_host: str = "localhost", qdrant_port: int = 6333):
         """Ingest document to Qdrant using JSON tree parsing logic."""
+        if not qdrant_host or not qdrant_port:
+            raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
+
         if logflag:
             logger.info(f"Parsing JSON {json_tree_path} for collection {collection_name}.")
 
@@ -208,6 +213,10 @@ class OpeaQdrantDataprep(OpeaComponent):
         if logflag:
             logger.info(f"Done preprocessing. Created {len(chunks)} chunks from the JSON file.")
 
+        self.create_qdrant_client(qdrant_host, qdrant_port)
+        if not self.check_health(qdrant_host, qdrant_port):
+            raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
+
         if not self.collection_exists(collection_name):
             self.client.create_collection(
                 collection_name=collection_name,
@@ -226,111 +235,13 @@ class OpeaQdrantDataprep(OpeaComponent):
                 embedding=self.embedder,
                 metadatas=metadatas,
                 collection_name=collection_name,
-                host=QDRANT_HOST,
-                port=QDRANT_PORT,
+                host=qdrant_host,
+                port=qdrant_port,
             )
             if logflag:
                 logger.info(f"Processed batch {i//batch_size + 1}/{(num_chunks-1)//batch_size + 1} for collection {collection_name}")
 
         return True
-
-    # async def ingest_files(
-    #     self,
-    #     input: DataprepRequest,
-    #     collection_name: Optional[str] = DEFAULT_COLLECTION_NAME,
-    # ):
-    #     """Ingest files/links content into qdrant database.
-
-    #     Save in the format of vector[768].
-    #     Returns '{"status": 200, "message": "Data preparation succeeded"}' if successful.
-    #     Args:
-    #         input (DataprepRequest): Model containing the following parameters:
-    #             files (Union[UploadFile, List[UploadFile]], optional): A file or a list of files to be ingested. Defaults to File(None).
-    #             link_list (str, optional): A list of links to be ingested. Defaults to Form(None).
-    #             chunk_size (int, optional): The size of the chunks to be split. Defaults to Form(1500).
-    #             chunk_overlap (int, optional): The overlap between chunks. Defaults to Form(100).
-    #             process_table (bool, optional): Whether to process tables in PDFs. Defaults to Form(False).
-    #             table_strategy (str, optional): The strategy to process tables in PDFs. Defaults to Form("fast").
-    #             collection_name (Optional[str]): The Qdrant collection to ingest into. Defaults to env var COLLECTION_NAME.
-    #     """
-    #     # files = input.files
-    #     link_list = input.link_list
-    #     chunk_size = input.chunk_size
-    #     chunk_overlap = input.chunk_overlap
-    #     process_table = input.process_table
-    #     table_strategy = input.table_strategy
-
-    #     if logflag:
-    #         logger.info(f"files:{files}")
-    #         logger.info(f"link_list:{link_list}")
-    #         logger.info(f"Ingesting into collection: {collection_name}")
-
-    #     if files:
-    #         if not isinstance(files, list):
-    #             files = [files]
-    #         uploaded_files = []
-    #         for file in files:
-    #             encode_file = encode_filename(file.filename)
-    #             save_path = self.upload_folder + encode_file
-    #             await save_content_to_local_disk(save_path, file)
-    #             if save_path.endswith('.json'):
-    #                 await self.ingest_data_to_qdrant(
-    #                     json_tree_path=save_path,
-    #                     collection_name=collection_name,
-    #                     chunk_size=chunk_size,
-    #                     chunk_overlap=chunk_overlap
-    #                 )
-    #             else:
-    #                 await self.ingest_data_to_qdrant(
-    #                     DocPath(
-    #                         path=save_path,
-    #                         chunk_size=chunk_size,
-    #                         chunk_overlap=chunk_overlap,
-    #                         process_table=process_table,
-    #                         table_strategy=table_strategy,
-    #                     ),
-    #                     collection_name=collection_name,
-    #                 )
-    #             uploaded_files.append(save_path)
-    #             if logflag:
-    #                 logger.info(f"Successfully saved file {save_path} to collection {collection_name}")
-    #         result = {"status": 200, "message": "Data preparation succeeded"}
-    #         if logflag:
-    #             logger.info(result)
-    #         return result
-
-    #     if link_list:
-    #         link_list = json.loads(link_list)
-    #         if not isinstance(link_list, list):
-    #             raise HTTPException(status_code=400, detail="link_list should be a list.")
-    #         for link in link_list:
-    #             encoded_link = encode_filename(link)
-    #             save_path = self.upload_folder + encoded_link + ".txt"
-    #             content = parse_html_new([link], chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    #             try:
-    #                 await save_content_to_local_disk(save_path, content)
-    #                 await self.ingest_data_to_qdrant(
-    #                     DocPath(
-    #                         path=save_path,
-    #                         chunk_size=chunk_size,
-    #                         chunk_overlap=chunk_overlap,
-    #                         process_table=process_table,
-    #                         table_strategy=table_strategy,
-    #                     ),
-    #                     collection_name=collection_name,
-    #                 )
-    #             except json.JSONDecodeError:
-    #                 raise HTTPException(status_code=500, detail="Fail to ingest data into qdrant.")
-
-    #             if logflag:
-    #                 logger.info(f"Successfully saved link {link} to collection {collection_name}")
-
-    #         result = {"status": 200, "message": "Data preparation succeeded"}
-    #         if logflag:
-    #             logger.info(result)
-    #         return result
-
-    #     raise HTTPException(status_code=400, detail="Must provide either a file or a string list.")
     
     def extract_filename(self, filename: str) -> str:
         """Extracts the base filename without extensions."""
@@ -358,9 +269,11 @@ class OpeaQdrantDataprep(OpeaComponent):
         chunk_overlap = input.chunk_overlap
         process_table = input.process_table
         table_strategy = input.table_strategy
+        qdrant_host = input.qdrant_host
+        qdrant_port = input.qdrant_port
 
-        if not user or not filename:
-            raise HTTPException(status_code=400, detail="Must provide both user and filename.")
+        if not user or not filename or not qdrant_host or not qdrant_port:
+            raise HTTPException(status_code=400, detail="Must provide user, filename, qdrant_host, and qdrant_port.")
 
         filename = self.extract_filename(filename)
 
@@ -382,7 +295,9 @@ class OpeaQdrantDataprep(OpeaComponent):
             user=user,
             filename=filename,
             chunk_size=chunk_size,
-            chunk_overlap=chunk_overlap
+            chunk_overlap=chunk_overlap,
+            qdrant_host=qdrant_host,
+            qdrant_port=qdrant_port
         )
 
         result = {"status": 200, "message": "Data preparation succeeded"}
@@ -390,7 +305,7 @@ class OpeaQdrantDataprep(OpeaComponent):
             logger.info(result)
         return result
 
-    async def get_files(self, collection_name: Optional[str] = DEFAULT_COLLECTION_NAME):
+    async def get_files(self, collection_name: Optional[str] = DEFAULT_COLLECTION_NAME, qdrant_host: str = None, qdrant_port: int = None):
         """Get file structure from Qdrant collection in the format of
         {
             "name": "File Name",
@@ -398,6 +313,13 @@ class OpeaQdrantDataprep(OpeaComponent):
             "type": "File",
             "parent": "",
         }"""
+        if not qdrant_host or not qdrant_port:
+            raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
+
+        self.create_qdrant_client(qdrant_host, qdrant_port)
+        if not self.check_health():
+            raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
+
         if not self.collection_exists(collection_name):
             raise HTTPException(status_code=404, detail=f"Collection {collection_name} does not exist.")
 
@@ -424,13 +346,20 @@ class OpeaQdrantDataprep(OpeaComponent):
             logger.info(f"Retrieved files from collection {collection_name}: {file_structure}")
         return file_structure
 
-    async def delete_files(self, file_path: str = Body(..., embed=True), collection_name: Optional[str] = DEFAULT_COLLECTION_NAME):
+    async def delete_files(self, file_path: str, collection_name: Optional[str] = DEFAULT_COLLECTION_NAME, qdrant_host: str = None, qdrant_port: int = None):
         """Delete file according to `file_path` from the specified collection.
 
         `file_path`:
             - specific file path (e.g. /path/to/file.txt): delete points related to this file
             - "all": delete all points in the collection
         """
+        if not qdrant_host or not qdrant_port:
+            raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
+
+        self.create_qdrant_client(qdrant_host, qdrant_port)
+        if not self.check_health():
+            raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
+
         if not self.collection_exists(collection_name):
             raise HTTPException(status_code=404, detail=f"Collection {collection_name} does not exist.")
 
@@ -457,8 +386,15 @@ class OpeaQdrantDataprep(OpeaComponent):
                 logger.info(f"Deleted file {file_path} from collection {collection_name}")
             return {"status": 200, "message": f"File {file_path} deleted from collection {collection_name}"}
 
-    async def get_list_of_collections(self):
+    async def get_list_of_collections(self, qdrant_host: str = None, qdrant_port: int = None):
         """Get list of all collections in Qdrant."""
+        if not qdrant_host or not qdrant_port:
+            raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
+
+        self.create_qdrant_client(qdrant_host, qdrant_port)
+        if not self.check_health():
+            raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
+
         collections = self.client.get_collections()
         collection_names = [col.name for col in collections.collections]
         if logflag:

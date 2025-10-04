@@ -1,7 +1,3 @@
-# Copyright (C) 2024 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
-
-
 import os
 import time
 from typing import Union
@@ -35,7 +31,6 @@ loader = OpeaDataprepLoader(
     description=f"OPEA DATAPREP Component: {dataprep_component_name}",
 )
 
-
 async def resolve_dataprep_request(request: Request):
     form = await request.form()
     
@@ -47,9 +42,24 @@ async def resolve_dataprep_request(request: Request):
     if not filename:
         raise HTTPException(status_code=400, detail="Missing required 'filename' field.")
 
+    qdrant_host = form.get("qdrant_host")
+    if not qdrant_host:
+        raise HTTPException(status_code=400, detail="Missing required 'qdrant_host' field.")
+
+    qdrant_port = form.get("qdrant_port")
+    if not qdrant_port:
+        raise HTTPException(status_code=400, detail="Missing required 'qdrant_port' field.")
+    else:
+        try:
+            qdrant_port = int(qdrant_port)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid 'qdrant_port'. Must be an integer.")
+
     common_args = {
         "user": user,
         "filename": filename,
+        "qdrant_host": qdrant_host,
+        "qdrant_port": qdrant_port,
         # "files": form.get("files", None),
         "link_list": form.get("link_list", None),
         "chunk_size": form.get("chunk_size", 2000),
@@ -63,7 +73,6 @@ async def resolve_dataprep_request(request: Request):
         return QdrantDataprepRequest(**common_args, collection_name=form.get("collection_name", "rag-qdrant"))
 
     return DataprepRequest(**common_args)
-
 
 @register_microservice(
     name="opea_service@dataprep",
@@ -80,7 +89,6 @@ async def ingest_files(
 ):
     if isinstance(input, QdrantDataprepRequest):
         logger.info(f"[ ingest ] Qdrant mode: collection_name={input.collection_name}")
-    # elif ...
     else:
         logger.info("[ ingest ] Base mode")
 
@@ -88,24 +96,38 @@ async def ingest_files(
 
     files = input.files
     link_list = input.link_list
+    
+    print("Input parameters")
+    print("user:", input.user)
+    print("filename:", input.filename)
+    if hasattr(input, 'qdrant_host'):
+        print("qdrant_host:", input.qdrant_host)
+    if hasattr(input, 'qdrant_port'):
+        print("qdrant_port:", input.qdrant_port)
 
     if logflag:
         logger.info(f"[ ingest ] files:{files}")
         logger.info(f"[ ingest ] link_list:{link_list}")
 
     try:
-        response = await loader.ingest_files(input)
+        # Pass qdrant_host and qdrant_port explicitly if they exist
+        if hasattr(input, 'qdrant_host') and hasattr(input, 'qdrant_port'):
+            response = await loader.ingest_files(
+                input,
+                collection_name=input.collection_name if hasattr(input, 'collection_name') else None,
+                qdrant_host=input.qdrant_host,
+                qdrant_port=input.qdrant_port
+            )
+        else:
+            response = await loader.ingest_files(input)
 
-        # Log the result if logging is enabled
         if logflag:
             logger.info(f"[ ingest ] Output generated: {response}")
-        # Record statistics
         statistics_dict["opea_service@dataprep"].append_latency(time.time() - start, None)
         return response
     except Exception as e:
         logger.error(f"Error during dataprep ingest invocation: {e}")
         raise
-
 
 @register_microservice(
     name="opea_service@dataprep",
@@ -115,7 +137,11 @@ async def ingest_files(
     port=5000,
 )
 @register_statistics(names=["opea_service@dataprep"])
-async def get_files(collection_name: str = Body(None, embed=True)):
+async def get_files(
+    collection_name: str = Body(None, embed=True),
+    qdrant_host: str = Body(None, embed=True),
+    qdrant_port: int = Body(None, embed=True),
+):
     start = time.time()
 
     if logflag:
@@ -124,7 +150,9 @@ async def get_files(collection_name: str = Body(None, embed=True)):
     try:
         # Use the loader to invoke the component
         if dataprep_component_name == "OPEA_DATAPREP_QDRANT":
-            response = await loader.get_files(collection_name)
+            if not qdrant_host or not qdrant_port:
+                raise HTTPException(status_code=400, detail="Missing required 'qdrant_host' and 'qdrant_port' for QDRANT.")
+            response = await loader.get_files(collection_name, qdrant_host, qdrant_port)
         elif dataprep_component_name == "OPEA_DATAPREP_REDIS":
             response = await loader.get_files(collection_name)
         else:
@@ -145,7 +173,6 @@ async def get_files(collection_name: str = Body(None, embed=True)):
         logger.error(f"Error during dataprep get invocation: {e}")
         raise
 
-
 @register_microservice(
     name="opea_service@dataprep",
     service_type=ServiceType.DATAPREP,
@@ -154,7 +181,12 @@ async def get_files(collection_name: str = Body(None, embed=True)):
     port=5000,
 )
 @register_statistics(names=["opea_service@dataprep"])
-async def delete_files(file_path: str = Body(..., embed=True), collection_name: str = Body(None, embed=True)):
+async def delete_files(
+    file_path: str = Body(..., embed=True),
+    collection_name: str = Body(None, embed=True),
+    qdrant_host: str = Body(None, embed=True),
+    qdrant_port: int = Body(None, embed=True),
+):
     start = time.time()
 
     if logflag:
@@ -163,7 +195,9 @@ async def delete_files(file_path: str = Body(..., embed=True), collection_name: 
     try:
         # Use the loader to invoke the component
         if dataprep_component_name == "OPEA_DATAPREP_QDRANT":
-            response = await loader.delete_files(file_path, collection_name)
+            if not qdrant_host or not qdrant_port:
+                raise HTTPException(status_code=400, detail="Missing required 'qdrant_host' and 'qdrant_port' for QDRANT.")
+            response = await loader.delete_files(file_path, collection_name, qdrant_host, qdrant_port)
         elif dataprep_component_name == "OPEA_DATAPREP_REDIS":
             response = await loader.delete_files(file_path, collection_name)
         else:
@@ -184,7 +218,6 @@ async def delete_files(file_path: str = Body(..., embed=True), collection_name: 
         logger.error(f"Error during dataprep delete invocation: {e}")
         raise
 
-
 @register_microservice(
     name="opea_service@dataprep",
     service_type=ServiceType.DATAPREP,
@@ -193,7 +226,10 @@ async def delete_files(file_path: str = Body(..., embed=True), collection_name: 
     port=5000,
 )
 @register_statistics(names=["opea_service@dataprep"])
-async def get_list_of_collections():
+async def get_list_of_collections(
+    qdrant_host: str = Body(..., embed=True),
+    qdrant_port: int = Body(..., embed=True),
+):
     start = time.time()
     if logflag:
         logger.info("[ get ] start to get list of collections.")
@@ -203,7 +239,7 @@ async def get_list_of_collections():
         raise HTTPException(status_code=400, detail="Qdrant backend required.")
 
     try:
-        response = await loader.get_list_of_collections()
+        response = await loader.get_list_of_collections(qdrant_host, qdrant_port)
 
         if logflag:
             logger.info(f"[ get ] list of collections: {response}")
@@ -213,7 +249,6 @@ async def get_list_of_collections():
     except Exception as e:
         logger.error(f"Error during dataprep get list of collections: {e}")
         raise
-
 
 @register_microservice(
     name="opea_service@dataprep",
@@ -235,21 +270,17 @@ async def get_list_of_indices():
         raise
 
     try:
-        # Use the loader to invoke the component
         response = await loader.get_list_of_indices()
 
-        # Log the result if logging is enabled
         if logflag:
             logger.info(f"[ get ] list of indices: {response}")
 
-        # Record statistics
         statistics_dict["opea_service@dataprep"].append_latency(time.time() - start, None)
 
         return response
     except Exception as e:
         logger.error(f"Error during dataprep get list of indices: {e}")
         raise
-
 
 if __name__ == "__main__":
     logger.info("OPEA Dataprep Microservice is starting...")
