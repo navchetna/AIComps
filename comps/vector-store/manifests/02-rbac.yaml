@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: provisioner
+  namespace: vector-db
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: provisioner-role
+  namespace: vector-db
+rules:
+- apiGroups: [""]
+  resources: ["services", "pods"]
+  verbs: ["get", "list", "create", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "create", "delete", "watch"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: provisioner-binding
+  namespace: vector-db
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: provisioner-role
+subjects:
+- kind: ServiceAccount
+  name: provisioner
+  namespace: vector-db

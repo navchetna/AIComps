@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: provisioner-api
+  namespace: vector-db
+  labels:
+    app: provisioner-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: provisioner-api
+  template:
+    metadata:
+      labels:
+        app: provisioner-api
+    spec:
+      serviceAccountName: provisioner
+      containers:
+      - name: api
+        image: navchetna/vector-db-api:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: NAMESPACE
+          value: "vector-db"
+        - name: DEFAULT_TTL
+          value: "1800"
+        - name: QDRANT_IMAGE
+          value: "qdrant/qdrant:latest"
+        - name: NODE_IP
+          value: "192.102.191.189"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        volumeMounts:
+        - name: qdrant-data
+          mountPath: /mnt/qdrant-data
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      volumes:
+      - name: qdrant-data
+        hostPath:
+          path: /mnt/qdrant-data
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: provisioner-api
+  namespace: vector-db
+  labels:
+    app: provisioner-api
+spec:
+  type: NodePort
+  selector:
+    app: provisioner-api
+  ports:
+  - port: 80
+    targetPort: 8001
+    nodePort: 32162
+    protocol: TCP
+    name: http

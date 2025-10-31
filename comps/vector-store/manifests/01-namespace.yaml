@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vector-db
+  labels:
+    name: vector-db
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: vector-db-quota
+  namespace: vector-db
+spec:
+  hard:
+    limits.memory: "10Gi"
+    requests.memory: "10Gi"
+
