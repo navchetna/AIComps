@@ -4,12 +4,6 @@ from typing import List, Optional, Union
 
 from fastapi import Body, HTTPException
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import json
-import os
-from typing import List, Optional, Union
-
-from fastapi import Body, HTTPException
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings, HuggingFaceInferenceAPIEmbeddings
 from langchain_community.vectorstores import Qdrant
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -43,6 +37,7 @@ TEI_EMBEDDING_ENDPOINT = os.getenv("TEI_EMBEDDING_ENDPOINT", "")
 HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN", "")
 
 DEFAULT_COLLECTION_NAME = os.getenv("COLLECTION_NAME", "rag-qdrant")
+BASE_OUTPUTS_DIR = os.getenv("BASE_OUTPUTS_DIR", "./results")
 
 @OpeaComponentRegistry.register("OPEA_DATAPREP_QDRANT")
 class OpeaQdrantDataprep(OpeaComponent):
@@ -243,12 +238,18 @@ class OpeaQdrantDataprep(OpeaComponent):
 
         return True
     
-    def extract_filename(self, filename: str) -> str:
-        """Extracts the base filename without extensions."""
-        parts = filename.split('.')
-        if len(parts) > 1:
-            return '.'.join(parts[:-1])
-        return filename
+    def extract_folder_name_from_file_path(self, file_path: str) -> str:
+        """
+        Extracts the folder name from a file path.
+        For example: 
+        - '/home/user/outputs/AI_Servers_Lenovo/output_tree.json' -> 'AI_Servers_Lenovo'
+        - 'output_tree.json' -> None (no folder in path)
+        """
+        dir_path = os.path.dirname(file_path)
+        if dir_path:
+            folder_name = os.path.basename(dir_path)
+            return folder_name
+        return None
 
     async def ingest_files(
         self,
@@ -275,15 +276,21 @@ class OpeaQdrantDataprep(OpeaComponent):
         if not user or not filename or not qdrant_host or not qdrant_port:
             raise HTTPException(status_code=400, detail="Must provide user, filename, qdrant_host, and qdrant_port.")
 
-        filename = self.extract_filename(filename)
+        folder_name = self.extract_folder_name_from_file_path(filename)
+        
+        if not folder_name:
+            folder_name = os.path.splitext(os.path.basename(filename))[0]
 
-        folder_path = os.path.join('.', user, 'outputs', filename)
+        folder_path = os.path.join(BASE_OUTPUTS_DIR, user, 'outputs', folder_name)
         json_tree_path = os.path.join(folder_path, 'output_tree.json')
+
+        print("Folder path: ", folder_path)
+        print("JSON tree path: ", json_tree_path)
 
         if not os.path.exists(json_tree_path):
             raise HTTPException(
                 status_code=404,
-                detail="output_tree.json does not exist. Please parse the PDF to generate a markdown."
+                detail=f"output_tree.json does not exist at {json_tree_path}. Please parse the PDF to generate a markdown."
             )
 
         if logflag:
@@ -293,7 +300,7 @@ class OpeaQdrantDataprep(OpeaComponent):
             json_tree_path=json_tree_path,
             collection_name=collection_name,
             user=user,
-            filename=filename,
+            filename=folder_name,
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             qdrant_host=qdrant_host,
@@ -317,7 +324,7 @@ class OpeaQdrantDataprep(OpeaComponent):
             raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
 
         self.create_qdrant_client(qdrant_host, qdrant_port)
-        if not self.check_health():
+        if not self.check_health(qdrant_host, qdrant_port):
             raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
 
         if not self.collection_exists(collection_name):
@@ -357,7 +364,7 @@ class OpeaQdrantDataprep(OpeaComponent):
             raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
 
         self.create_qdrant_client(qdrant_host, qdrant_port)
-        if not self.check_health():
+        if not self.check_health(qdrant_host, qdrant_port):
             raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
 
         if not self.collection_exists(collection_name):
@@ -392,7 +399,7 @@ class OpeaQdrantDataprep(OpeaComponent):
             raise HTTPException(status_code=400, detail="qdrant_host and qdrant_port must be provided")
 
         self.create_qdrant_client(qdrant_host, qdrant_port)
-        if not self.check_health():
+        if not self.check_health(qdrant_host, qdrant_port):
             raise HTTPException(status_code=503, detail="Qdrant service is not healthy.")
 
         collections = self.client.get_collections()

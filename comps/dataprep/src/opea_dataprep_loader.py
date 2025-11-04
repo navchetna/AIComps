@@ -22,7 +22,7 @@ class OpeaDataprepLoader(OpeaComponentLoader):
             logger.info("[ dataprep loader ] ingest files")
         if self.component.name == "OPEA_DATAPREP_QDRANT" and hasattr(input, 'collection_name'):
             return await self.component.ingest_files(input, collection_name=input.collection_name)
-        return await self.component.ingest_files(input, *args, **kwargs)
+        return await self.component.ingest_files(input)
 
     async def get_files(self, *args, **kwargs):
         if logflag:
@@ -39,10 +39,11 @@ class OpeaDataprepLoader(OpeaComponentLoader):
             logger.info("[ dataprep loader ] get indices")
         return self.component.get_list_of_indices(*args, **kwargs)
     
-    async def get_list_of_collections(self):
+    async def get_list_of_collections(self, qdrant_host, qdrant_port):
         if logflag:
             logger.info("[ dataprep loader ] get collections")
-        return await self.component.get_list_of_collections() 
+        return await self.component.get_list_of_collections(qdrant_host, qdrant_port)
+
 
 class OpeaDataprepMultiModalLoader(OpeaComponentLoader):
     def __init__(self, component_name, **kwargs):

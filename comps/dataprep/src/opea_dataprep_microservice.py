@@ -2,7 +2,7 @@ import os
 import time
 from typing import Union
 
-from fastapi import Body, Depends, HTTPException, Request
+from fastapi import Body, Depends, HTTPException, Request, UploadFile, File
 from integrations.qdrant import OpeaQdrantDataprep
 from opea_dataprep_loader import OpeaDataprepLoader
 
@@ -40,7 +40,17 @@ async def resolve_dataprep_request(request: Request):
 
     filename = form.get("filename")
     if not filename:
-        raise HTTPException(status_code=400, detail="Missing required 'filename' field.")
+        files = form.getlist("files")
+        if files and len(files) > 0:
+            # Extract filename from the first uploaded file
+            uploaded_file = files[0]
+            if hasattr(uploaded_file, 'filename'):
+                filename = uploaded_file.filename
+            else:
+                filename = str(uploaded_file)
+        
+        if not filename:
+            raise HTTPException(status_code=400, detail="Missing required 'filename' field or uploaded file.")
 
     qdrant_host = form.get("qdrant_host")
     if not qdrant_host:
@@ -60,11 +70,11 @@ async def resolve_dataprep_request(request: Request):
         "filename": filename,
         "qdrant_host": qdrant_host,
         "qdrant_port": qdrant_port,
-        # "files": form.get("files", None),
+        "files": form.getlist("files") if "files" in form else None,
         "link_list": form.get("link_list", None),
-        "chunk_size": form.get("chunk_size", 2000),
-        "chunk_overlap": form.get("chunk_overlap", 200),
-        "process_table": form.get("process_table", False),
+        "chunk_size": int(form.get("chunk_size", 2000)),
+        "chunk_overlap": int(form.get("chunk_overlap", 200)),
+        "process_table": form.get("process_table", "false").lower() == "true",
         "table_strategy": form.get("table_strategy", "fast"),
     }
     
@@ -72,7 +82,7 @@ async def resolve_dataprep_request(request: Request):
         print("QdrantDataprepRequest collection name:", form.get("collection_name"))
         return QdrantDataprepRequest(**common_args, collection_name=form.get("collection_name", "rag-qdrant"))
 
-    return DataprepRequest(**common_args)
+    return QdrantDataprepRequest(**common_args, collection_name="rag-qdrant")
 
 @register_microservice(
     name="opea_service@dataprep",
@@ -83,7 +93,7 @@ async def resolve_dataprep_request(request: Request):
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def ingest_files(
-    input: Union[DataprepRequest] = Depends(
+    input: Union[DataprepRequest, QdrantDataprepRequest] = Depends(
         resolve_dataprep_request
     ),
 ):
@@ -110,16 +120,7 @@ async def ingest_files(
         logger.info(f"[ ingest ] link_list:{link_list}")
 
     try:
-        # Pass qdrant_host and qdrant_port explicitly if they exist
-        if hasattr(input, 'qdrant_host') and hasattr(input, 'qdrant_port'):
-            response = await loader.ingest_files(
-                input,
-                collection_name=input.collection_name if hasattr(input, 'collection_name') else None,
-                qdrant_host=input.qdrant_host,
-                qdrant_port=input.qdrant_port
-            )
-        else:
-            response = await loader.ingest_files(input)
+        response = await loader.ingest_files(input)
 
         if logflag:
             logger.info(f"[ ingest ] Output generated: {response}")
