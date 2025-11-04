@@ -6,7 +6,7 @@
 ## Quick Start
 
 ### Prerequisites
-- Python 3.10+
+- Python 3.11+
 - Git
 - Linux/Unix system (recommended for TCMalloc support)
 
@@ -52,9 +52,9 @@ uv pip install git+https://github.com/navchetna/tree-parser.git
 ```
 
 ### 7. Performance Optimization
-Install Intel® Extension for PyTorch for significant performance gains:
+Install Intel® Extension for PyTorch for significant performance gains on **Xeon Processors**:
 ```bash
-uv pip install intel_extension_for_pytorch
+uv pip install intel_extension_for_pytorch==2.8.0
 ```
 
 Verify the installation:
@@ -71,15 +71,21 @@ export LD_PRELOAD=/lib/x86_64-linux-gnu/libtcmalloc.so.4
 ```
 
 ### 9. Expose this as an API
+Install the requirements
+```bash
+uv pip install -r requirements.txt
+```
+
 Start the application
 ```bash
 marker_server --host=0.0.0.0 --port=8000
 ```
 
-Send a curl request (new terminal)
+Send a curl request to the service
 ```bash
-curl -X POST "http://localhost:8000/marker/upload" -F "file=@/path/to/pdf" -F "user=<your_name>"
+curl -X POST http://localhost:8000/marker/upload -F "user=your-username" -F "file=@/path/to/pdf" -o output.json
 ```
+The output will be saved to 'output.json'
 
 Example script to convert the API response into markdown:
 > You need to update the file path within the script (could be coverted to cli arg)
@@ -234,14 +240,22 @@ from marker.converters.pdf import PdfConverter
 from marker.models import create_model_dict
 from marker.output import text_from_rendered
 
+from tree_parser.tree import Tree
+from tree_parser.treeparser import TreeParser
+
+FILEPATH = "/path/to/file.pdf"
+USERNAME = "navchetna" # Update logic to receive username dynamically if needed
+
 converter = PdfConverter(
     artifact_dict=create_model_dict(),
 )
-rendered = converter("FILEPATH")
-text, _, images = text_from_rendered(rendered)
-```
+tree = Tree(FILEPATH, user_param=USERNAME)
+tree_parser = TreeParser(USERNAME)
+tree_parser.populate_tree(tree, converter)
 
-`rendered` will be a pydantic basemodel with different properties depending on the output type requested.  With markdown output (default), you'll have the properties `markdown`, `metadata`, and `images`.  For json output, you'll have `children`, `block_type`, and `metadata`.
+tree_parser.generate_output_text(tree)
+tree_parser.generate_output_json(tree)
+```
 
 ### Custom configuration
 
@@ -252,9 +266,16 @@ from marker.converters.pdf import PdfConverter
 from marker.models import create_model_dict
 from marker.config.parser import ConfigParser
 
+from tree_parser.tree import Tree
+from tree_parser.treeparser import TreeParser
+
+FILEPATH = "path/to/file.pdf"
+USERNAME = "navchetna" # Update logic to receive username dynamically if needed
+
 config = {
-    "output_format": "json",
-    "ADDITIONAL_KEY": "VALUE"
+    "output_format": "markdown",
+    "force_ocr": "True"
+    # "ADDITIONAL_KEY": "VALUE"
 }
 config_parser = ConfigParser(config)
 
@@ -265,9 +286,15 @@ converter = PdfConverter(
     renderer=config_parser.get_renderer(),
     llm_service=config_parser.get_llm_service()
 )
-rendered = converter("FILEPATH")
+tree = Tree(FILEPATH, user_param=USERNAME)
+tree_parser = TreeParser(USERNAME)
+tree_parser.populate_tree(tree, converter)
+
+tree_parser.generate_output_text(tree)
+tree_parser.generate_output_json(tree)
 ```
 
+## BETA features
 ### Extract blocks
 
 Each document consists of one or more pages.  Pages contain blocks, which can themselves contain other blocks.  It's possible to programmatically manipulate these blocks.  
