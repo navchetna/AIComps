@@ -1,7 +1,8 @@
  # 📄 Navchetna PDF Parser
 
-> A powerful PDF parsing solution built for high-performance document processing
+> A powerful PDF parsing solution built for high-performance document processing - optimized for **Xeon CPUs**
 
+![PDF Parser Overview](assets/image.png)
 
 ## Quick Start
 
