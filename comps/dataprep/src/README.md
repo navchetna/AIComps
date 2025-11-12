@@ -20,8 +20,6 @@ docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
 export no_proxy=${your_no_proxy}
 export http_proxy=${your_http_proxy}
 export https_proxy=${your_http_proxy}
-export QDRANT_HOST=${host_ip}
-export QDRANT_PORT=6333
 export COLLECTION_NAME=rag-qdrant
 export PYTHONPATH=/path/to/AIComps
 ```
