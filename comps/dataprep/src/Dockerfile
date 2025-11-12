@@ -9,6 +9,7 @@ ARG ARCH="cpu"
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missing \
     build-essential \
+    libcairo2 \
     google-perftools \
     libgoogle-perftools-dev \
     wget curl \
