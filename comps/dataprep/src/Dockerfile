@@ -9,15 +9,8 @@ ARG ARCH="cpu"
 
 RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missing \
     build-essential \
-    default-jre \
-    libcairo2 \
-    libjemalloc-dev \
-    libmariadb-dev \
-    libpq-dev \
-    libreoffice \
-    poppler-utils \
-    tesseract-ocr \
-    ffmpeg \
+    google-perftools \
+    libgoogle-perftools-dev \
     wget curl \
     git \
  && rm -rf /var/lib/apt/lists/*
@@ -30,8 +23,9 @@ COPY comps /home/user/comps
 
 ARG uvpip='uv pip install --system --no-cache-dir'
 RUN pip install --no-cache-dir --upgrade pip setuptools uv && \
-    $uvpip torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
-    $uvpip -r /home/user/comps/dataprep/src/requirements-cpu.txt
+    $uvpip torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu && \
+    $uvpip -r /home/user/comps/dataprep/src/requirements-cpu.txt && \
+    $uvpip intel-extension-for-pytorch==2.8.0
 
 ENV PYTHONPATH="/home/user:${PYTHONPATH}"
 

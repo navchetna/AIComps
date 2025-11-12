@@ -10,7 +10,9 @@
 
 ### Start Qdrant Server
 
-docker run -p 6333:6333 -p 6334:6334 -v ./qdrant_storage:/qdrant/storage:z qdrant/qdrant
+```bash
+docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+```
 
 ### Setup Environment Variables
 
@@ -21,28 +23,28 @@ export https_proxy=${your_http_proxy}
 export QDRANT_HOST=${host_ip}
 export QDRANT_PORT=6333
 export COLLECTION_NAME=rag-qdrant
-export PYTHONPATH=/home/intel/Ervin/RailTel-Lenovo
+export PYTHONPATH=/path/to/AIComps
 ```
 
 ### Build Docker Image
 
 ```bash
 cd ../../../../
-docker build -t navchetna/dataprep:json-ip --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/dataprep/src/Dockerfile .
+docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/dataprep/src/Dockerfile .
 ```
 
 ### Run Docker with CLI
 
 ```bash
-docker run -d --name="dataprep-qdrant-server" -p 6007:5000 --ipc=host -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" navchetna/dataprep:json-ip
+docker run -d --name="dataprep-qdrant-server" -p 6007:5000 --ipc=host -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" navchetna/dataprep:latest
 ```
 
-### Run Docker with Docker Compose
+<!-- ### Run Docker with Docker Compose
 
 ```bash
 cd comps/dataprep/deployment/docker_compose
 docker compose -f compose_qdrant.yaml up -d
-```
+``` -->
 
 ## Invoke Microservice
 
@@ -53,16 +55,22 @@ Once document preparation microservice for Qdrant is started, user can use below
 ```bash
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
-    -F "files=@./file1.json" \
-    http://localhost:5000/v1/dataprep/ingest
+    -F "filename=NAME_OF_THE_FILE" \
+    -F "qdrant_host=QDRANT_HOST" \
+    -F "qdrant_port=QDRANT_PORT" \
+    -F "user=YOUR_USERNAME" \
+    http://localhost:6007/v1/dataprep/ingest
 ```
 
 Send request to a specific collection: (defaults to rag-qdrant)
 ```bash
 curl -X POST \
-    -F "files=@./file1.json" \
+    -F "filename=NAME_OF_THE_FILE" \
+    -F "qdrant_host=QDRANT_HOST" \
+    -F "qdrant_port=QDRANT_PORT" \
+    -F "user=YOUR_USERNAME" \
     -F "collection_name=your_collection" \
-    "http://localhost:5000/v1/dataprep/ingest" 
+    "http://localhost:6007/v1/dataprep/ingest" 
 ```
 
 You can specify chunk_size and chunk_size by the following commands.
@@ -70,10 +78,13 @@ You can specify chunk_size and chunk_size by the following commands.
 ```bash
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
-    -F "files=@./file1.json" \
+    -F "filename=NAME_OF_THE_FILE" \
+    -F "qdrant_host=QDRANT_HOST" \
+    -F "qdrant_port=QDRANT_PORT" \
+    -F "user=YOUR_USERNAME" \
     -F "chunk_size=2000" \
     -F "chunk_overlap=200" \
-    http://localhost:5000/v1/dataprep/ingest
+    http://localhost:6007/v1/dataprep/ingest
 ```
 
 We support table extraction from pdf documents. You can specify process_table and table_strategy by the following commands. "table_strategy" refers to the strategies to understand tables for table retrieval. As the setting progresses from "fast" to "hq" to "llm," the focus shifts towards deeper table understanding at the expense of processing speed. The default strategy is "fast".
@@ -83,7 +94,10 @@ Note: If you specify "table_strategy=llm", You should first start TGI Service, p
 ```bash
 curl -X POST \
     -H "Content-Type: multipart/form-data" \
-    -F "files=@./your_file.pdf" \
+    -F "filename=NAME_OF_THE_FILE" \
+    -F "qdrant_host=QDRANT_HOST" \
+    -F "qdrant_port=QDRANT_PORT" \
+    -F "user=YOUR_USERNAME" \
     -F "process_table=true" \
     -F "table_strategy=hq" \
     http://localhost:6007/v1/dataprep/ingest
