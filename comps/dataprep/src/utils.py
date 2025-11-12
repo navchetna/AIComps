@@ -25,7 +25,7 @@ from urllib.parse import urlparse, urlunparse
 import aiofiles
 import aiohttp
 import cairosvg
-import cv2
+# import cv2
 import docx
 import docx2txt
 import fitz
@@ -115,27 +115,27 @@ def get_separators():
     return separators
 
 
-def process_page(doc, idx):
-    page = doc.load_page(idx)
-    pagetext = page.get_text().strip()
-    result = pagetext if pagetext.endswith(("!", "?", ".")) else pagetext + "."
+# def process_page(doc, idx):
+#     page = doc.load_page(idx)
+#     pagetext = page.get_text().strip()
+#     result = pagetext if pagetext.endswith(("!", "?", ".")) else pagetext + "."
 
-    page_images = doc.get_page_images(idx)
-    if page_images:
-        for img_index, img in enumerate(page_images):
-            xref = img[0]
-            img_data = doc.extract_image(xref)
-            img_bytes = img_data["image"]
+#     page_images = doc.get_page_images(idx)
+#     if page_images:
+#         for img_index, img in enumerate(page_images):
+#             xref = img[0]
+#             img_data = doc.extract_image(xref)
+#             img_bytes = img_data["image"]
 
-            # process images
-            img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
-            img_result = pytesseract.image_to_string(img_array, lang="eng", config="--psm 6")
+#             # process images
+#             img_array = cv2.imdecode(np.frombuffer(img_bytes, np.uint8), cv2.IMREAD_COLOR)
+#             img_result = pytesseract.image_to_string(img_array, lang="eng", config="--psm 6")
 
-            # add results
-            pageimg = img_result.strip()
-            pageimg += "" if pageimg.endswith(("!", "?", ".")) else "."
-            result += pageimg
-    return result
+#             # add results
+#             pageimg = img_result.strip()
+#             pageimg += "" if pageimg.endswith(("!", "?", ".")) else "."
+#             result += pageimg
+#     return result
 
 
 def load_pdf(pdf_path):
