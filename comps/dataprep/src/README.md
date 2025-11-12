@@ -34,9 +34,9 @@ docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy -
 ```
 
 ### Run Docker with CLI
-
+Note that the service assumes your PDF tree will be stored in the HOME directory under `$HOME/pdf-results`
 ```bash
-docker run -d --name="dataprep-qdrant-server" -p 6007:5000 --ipc=host -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" navchetna/dataprep:latest
+docker run -d --name="dataprep-qdrant-server" -v $HOME/pdf-results:/home/user/pdf-results -p 6007:5000  -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e no_proxy=$no_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" navchetna/dataprep:latest
 ```
 
 <!-- ### Run Docker with Docker Compose
