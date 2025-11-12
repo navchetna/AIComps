@@ -37,7 +37,7 @@ TEI_EMBEDDING_ENDPOINT = os.getenv("TEI_EMBEDDING_ENDPOINT", "")
 HF_TOKEN = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN", "")
 
 DEFAULT_COLLECTION_NAME = os.getenv("COLLECTION_NAME", "rag-qdrant")
-BASE_OUTPUTS_DIR = os.getenv("BASE_OUTPUTS_DIR", "./results")
+BASE_OUTPUTS_DIR = os.path.join(os.path.expanduser("~"), "pdf-results")
 
 @OpeaComponentRegistry.register("OPEA_DATAPREP_QDRANT")
 class OpeaQdrantDataprep(OpeaComponent):
