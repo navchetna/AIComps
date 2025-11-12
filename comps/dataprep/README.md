@@ -21,7 +21,7 @@ Dataprep microservice are supported on various databases, as shown in the table 
 
 | Databases               | Readme                                                                   |
 | :---------------------- | :----------------------------------------------------------------------- |
-| `Qdrant`                | [Dataprep Microservice with Qdrant](src/README_qdrant.md)                |
+| `Qdrant`                | [Dataprep Microservice with Qdrant](src/README.md)                |
 
 ## Running in the air gapped environment
 
