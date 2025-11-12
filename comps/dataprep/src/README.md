@@ -27,7 +27,7 @@ export PYTHONPATH=/path/to/AIComps
 ### Build Docker Image
 
 ```bash
-cd ../../../../
+cd ../../../../ # to the project root dir (AIComps)
 docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/dataprep/src/Dockerfile .
 ```
 
