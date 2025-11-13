@@ -20,7 +20,10 @@ RUN useradd -m -s /bin/bash user && \
     mkdir -p /home/user && \
     chown -R user:user /home/user
 
-COPY comps /home/user/comps
+COPY comps/__init__.py /home/user/comps/__init__.py
+COPY comps/version.py /home/user/comps/version.py
+COPY comps/cores /home/user/comps/cores
+COPY comps/dataprep /home/user/comps/dataprep
 
 ARG uvpip='uv pip install --system --no-cache-dir'
 RUN pip install --no-cache-dir --upgrade pip setuptools uv && \
@@ -29,6 +32,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools uv && \
     $uvpip intel-extension-for-pytorch==2.8.0
 
 ENV PYTHONPATH="/home/user:${PYTHONPATH}"
+ENV LD_PRELOAD="/lib/x86_64-linux-gnu/libtcmalloc.so.4"
 
 RUN mkdir -p /home/user/comps/dataprep/src/uploaded_files && chown -R user:user /home/user/comps/dataprep/src/uploaded_files
 RUN mkdir -p /data && chown -R user:user /data
@@ -44,9 +48,6 @@ RUN mkdir -p /home/user/comps/dataprep/src/out && \
     chown -R user:user /home/user/comps/dataprep/src/out
 
 USER user
-
-RUN mkdir -p /home/user/nltk_data && \
-    python -m nltk.downloader -d /home/user/nltk_data punkt_tab averaged_perceptron_tagger_eng stopwords
 
 WORKDIR /home/user/comps/dataprep/src
 
