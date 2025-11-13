@@ -14,14 +14,21 @@
 docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
 ```
 
-### Setup Environment Variables
+> **Note:** You need to ensure that you have an LLM service running (for table description).  
+> See: [How to spin up a Groq service](../../groq/README.md)
 
+### Setup Environment Variables
 ```bash
 export no_proxy=${your_no_proxy}
 export http_proxy=${your_http_proxy}
-export https_proxy=${your_http_proxy}
+export https_proxy=${your_https_proxy}
 export COLLECTION_NAME=rag-qdrant
 export PYTHONPATH=/path/to/AIComps
+
+# LLM service configuration
+export LLM_SERVER_HOST_IP=localhost
+export LLM_SERVER_PORT=8000
+export LLM_MODEL_ID=llama-3.1-8b-instant
 ```
 
 ### Build Docker Image
@@ -34,7 +41,7 @@ docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy -
 ### Run Docker with CLI
 Note that the service assumes your PDF tree will be stored in the HOME directory under `$HOME/pdf-results`
 ```bash
-docker run -d --name="dataprep-qdrant-server" -v $HOME/pdf-results:/home/user/pdf-results -p 6007:5000  -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e no_proxy=$no_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" navchetna/dataprep:latest
+docker run -d --name="dataprep-qdrant-server" -v $HOME/pdf-results:/home/user/pdf-results -p 6007:5000  -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e no_proxy=$no_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" -e LLM_SERVER_HOST_IP=$LLM_SERVER_HOST_IP -e LLM_SERVER_PORT=$LLM_SERVER_PORT -e LLM_MODEL_ID=$LLM_MODEL_ID  navchetna/dataprep:latest
 ```
 
 <!-- ### Run Docker with Docker Compose
