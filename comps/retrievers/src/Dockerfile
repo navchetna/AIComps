@@ -9,25 +9,26 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missin
     libcairo2 \
     libglib2.0-0 \
     libjemalloc-dev \
+    wget curl \
     build-essential
 
 RUN useradd -m -s /bin/bash user && \
     mkdir -p /home/user && \
     chown -R user /home/user/
 
-COPY comps /home/user/comps
+COPY comps/__init__.py /home/user/comps/__init__.py
+COPY comps/version.py /home/user/comps/version.py
+COPY comps/cores /home/user/comps/cores
+COPY comps/retrievers /home/user/comps/retrievers
 
 ARG uvpip='uv pip install --system --no-cache-dir'
 RUN pip install --no-cache-dir --upgrade pip setuptools uv && \
-      $uvpip torch torchvision --index-url https://download.pytorch.org/whl/cpu; \
+      $uvpip torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cpu; \
       $uvpip -r /home/user/comps/retrievers/src/requirements-cpu.txt;
 
 ENV PYTHONPATH=$PYTHONPATH:/home/user
 
 USER user
-ENV NLTK_DATA=/home/user/nltk_data
-# air gapped support: predownload all needed nltk data
-RUN mkdir -p /home/user/nltk_data && python -m nltk.downloader -d /home/user/nltk_data punkt_tab stopwords
 
 WORKDIR /home/user/comps/retrievers/src
 
