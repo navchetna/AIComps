@@ -27,11 +27,14 @@ class OpeaQDrantRetriever(OpeaComponent):
         if not health_status:
             logger.error("OpeaQDrantRetriever health check failed.")
 
-    def _initialize_client(self, collection_name: str) -> tuple:
+    def _initialize_client(self, collection_name: str, host: str = None, port: int = None) -> tuple:
         """Initializes the qdrant document store and retriever for a specific collection."""
+        qdrant_host = host or os.getenv("QDRANT_HOST")
+        qdrant_port = port or os.getenv("QDRANT_PORT")
+
         qdrant_store = QdrantDocumentStore(
-            host=QDRANT_HOST,
-            port=QDRANT_PORT,
+            host=qdrant_host,
+            port=int(qdrant_port) if qdrant_port else None,
             embedding_dim=QDRANT_EMBED_DIMENSION,
             index=collection_name,
             recreate_index=False,
@@ -69,9 +72,12 @@ class OpeaQDrantRetriever(OpeaComponent):
         """
         if logflag:
             logger.info(f"[ similarity search ] input: {input}")
+        
+        host = getattr(input, "qdrant_host", None)
+        port = getattr(input, "qdrant_port", None)
 
         collection_name = input.collection_name or QDRANT_INDEX_NAME
-        db_store, retriever = self._initialize_client(collection_name)
+        db_store, retriever = self._initialize_client(collection_name, host, port)
         search_res = retriever.run(query_embedding=input.embedding)["documents"]
 
         # format result to align with the standard output in opea_retrievers_microservice.py
