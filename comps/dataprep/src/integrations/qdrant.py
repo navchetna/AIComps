@@ -99,7 +99,7 @@ class OpeaQdrantDataprep(OpeaComponent):
         pass
 
     def get_table_description(self, item: Table):
-        server_host_ip = os.getenv("SERVER_HOST_IP", "localhost")
+        server_host_ip = os.getenv("LLM_SERVER_HOST_IP", "localhost")
         server_port = os.getenv("LLM_SERVER_PORT", 8000)
         model_name = os.getenv("LLM_MODEL_ID")
         use_model_param = os.getenv("LLM_USE_MODEL_PARAM", "false").lower() == "true"
