@@ -17,8 +17,8 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/navchetna/pdf-parser.git
-cd pdf-parser/
+git clone https://github.com/navchetna/AIComps.git
+cd AIComps/comps/pdf-parser
 ```
 
 ### 2. Set Up UV Package Manager
@@ -35,6 +35,11 @@ source .pdf-venv/bin/activate
 ```
 
 ### 4. Install Core Dependencies
+Install the requirements
+```bash
+uv pip install -r requirements.txt
+```
+
 Install the marker-pdf library:
 ```bash
 uv pip install git+https://github.com/navchetna/marker.git
@@ -72,11 +77,6 @@ export LD_PRELOAD=/lib/x86_64-linux-gnu/libtcmalloc.so.4
 ```
 
 ### 9. Expose this as an API
-Install the requirements
-```bash
-uv pip install -r requirements.txt
-```
-
 Start the application
 ```bash
 marker_server --host=0.0.0.0 --port=8000
