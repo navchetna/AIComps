@@ -104,6 +104,8 @@ class EmbedDoc(BaseDoc):
     constraints: Optional[Union[Dict[str, Any], List[Dict[str, Any]], None]] = None
     index_name: Optional[str] = None
     collection_name: Optional[str] = None
+    qdrant_host: str = "localhost"
+    qdrant_port: int = 6333
 
 
 class EmbedMultimodalDoc(EmbedDoc):
