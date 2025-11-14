@@ -13,6 +13,11 @@
 ```bash
 docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
 ```
+Once Qdrant is running, you can access the Qdrant Web UI dashboard in your browser at:
+```bash
+http://localhost:6333/dashboard
+```
+---
 
 > **Note:** You need to ensure that you have an LLM service running (for table description).  
 > See: [How to spin up a Groq service](../../groq/README.md)
@@ -77,7 +82,7 @@ curl -X POST \
     -F "qdrant_port=QDRANT_PORT" \
     -F "user=YOUR_USERNAME" \
     -F "collection_name=your_collection" \
-    "http://localhost:6007/v1/dataprep/ingest" 
+    http://localhost:6007/v1/dataprep/ingest
 ```
 
 You can specify chunk_size and chunk_size by the following commands.

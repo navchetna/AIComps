@@ -4,6 +4,11 @@
 ```bash
 docker run -d --name=qdrant-db -p 6333:6333 qdrant/qdrant 
 ```
+**Note:** Once Qdrant is running, you can access the Qdrant Web UI dashboard in your browser at:
+```
+http://localhost:6333/dashboard
+```
+
 
 
 ## 1. 🚀Start Microservice with Python (Option 1)
