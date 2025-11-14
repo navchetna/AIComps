@@ -35,6 +35,8 @@ export LLM_MODEL_ID=llama-3.1-8b-instant
 
 ```bash
 cd ../../../../ # to the project root dir (AIComps)
+```
+```bash
 docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/dataprep/src/Dockerfile .
 ```
 
@@ -111,3 +113,4 @@ curl -X POST \
 ## Running in the air gapped environment
 
 Please follow the [common guide](../README.md#running-in-the-air-gapped-environment) to run dataprep microservice in the air gapped environment.
+
