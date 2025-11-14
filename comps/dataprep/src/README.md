@@ -48,7 +48,7 @@ docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy -
 ### Run Docker with CLI
 Note that the service assumes your PDF tree will be stored in the HOME directory under `$HOME/pdf-results`
 ```bash
-docker run -d --name="dataprep-qdrant-server" -v $HOME/pdf-results:/home/user/pdf-results -p 6007:5000  -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e no_proxy=$no_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" -e LLM_SERVER_HOST_IP=$LLM_SERVER_HOST_IP -e LLM_SERVER_PORT=$LLM_SERVER_PORT -e LLM_MODEL_ID=$LLM_MODEL_ID  navchetna/dataprep:latest
+docker run -d --name="dataprep-qdrant-server" -v $HOME/pdf-results:/home/user/pdf-results --network=host -e http_proxy=$http_proxy -e https_proxy=$https_proxy -e no_proxy=$no_proxy -e DATAPREP_COMPONENT_NAME="OPEA_DATAPREP_QDRANT" -e LLM_SERVER_HOST_IP=$LLM_SERVER_HOST_IP -e LLM_SERVER_PORT=$LLM_SERVER_PORT -e LLM_MODEL_ID=$LLM_MODEL_ID  navchetna/dataprep:latest
 ```
 
 <!-- ### Run Docker with Docker Compose
@@ -71,7 +71,7 @@ curl -X POST \
     -F "qdrant_host=QDRANT_HOST" \
     -F "qdrant_port=QDRANT_PORT" \
     -F "user=YOUR_USERNAME" \
-    http://localhost:6007/v1/dataprep/ingest
+    http://localhost:5000/v1/dataprep/ingest
 ```
 
 Send request to a specific collection: (defaults to rag-qdrant)
@@ -82,7 +82,7 @@ curl -X POST \
     -F "qdrant_port=QDRANT_PORT" \
     -F "user=YOUR_USERNAME" \
     -F "collection_name=your_collection" \
-    http://localhost:6007/v1/dataprep/ingest
+    http://localhost:5000/v1/dataprep/ingest
 ```
 
 You can specify chunk_size and chunk_size by the following commands.
@@ -96,7 +96,7 @@ curl -X POST \
     -F "user=YOUR_USERNAME" \
     -F "chunk_size=2000" \
     -F "chunk_overlap=200" \
-    http://localhost:6007/v1/dataprep/ingest
+    http://localhost:5000/v1/dataprep/ingest
 ```
 
 We support table extraction from pdf documents. You can specify process_table and table_strategy by the following commands. "table_strategy" refers to the strategies to understand tables for table retrieval. As the setting progresses from "fast" to "hq" to "llm," the focus shifts towards deeper table understanding at the expense of processing speed. The default strategy is "fast".
@@ -112,7 +112,7 @@ curl -X POST \
     -F "user=YOUR_USERNAME" \
     -F "process_table=true" \
     -F "table_strategy=hq" \
-    http://localhost:6007/v1/dataprep/ingest
+    http://localhost:5000/v1/dataprep/ingest
 ```
 
 ## Running in the air gapped environment
