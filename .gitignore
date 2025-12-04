@@ -21,3 +21,6 @@ output*
 results*
 *venv*
 upload*
+comps/pdf-parser/batch_processing/
+comps/pdf-parser/test/
+comps/pdf-parser/batch_jobs_store/batch_jobs.json

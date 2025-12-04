@@ -8,8 +8,9 @@ from tree_parser.tree import Tree
 from tree_parser.treeparser import TreeParser
 
 
-user = "ervin"
-pdf_path = "/home/intel/Ervin/Test/2305.15032v1-2-3.pdf"
+user = "ali"
+# pdf_path = "/home/intel/Ervin/Test/2305.15032v1-2-3.pdf"
+pdf_path = "home/test/assets/budget_speech.pdf"
 
 # config = {
 #     "output_format": "json",
