@@ -149,7 +149,7 @@ marker_gui
 ## Convert a single file
 
 ```shell
-marker_single /path/to/file.pdf
+marker_single /path/to/file.pdf --user <your_username>
 ```
 
 ### 💡 Intel Extension for PyTorch (IPEX) Installation Note
