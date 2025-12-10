@@ -82,6 +82,41 @@ Start the application
 marker_server --host=0.0.0.0 --port=8000
 ```
 
+### Persisting outputs outside the container (shared storage)
+
+When running the app in Docker you can configure storage paths via environment variables. This allows you to mount a shared volume that other containers (e.g. a frontend app) can also access.
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `UPLOAD_DIR` | `./uploads` | Temporary upload directory |
+| `BATCH_STORE_DIR` | `./batch_jobs_store` | Batch job metadata and JSON store |
+| `BATCH_PROCESSING_DIR` | `./batch_processing` | Processed output files |
+| `BATCH_INTERVAL` | `10` | Seconds between batch queue polls |
+
+**Example: share outputs between pdf-parser and a frontend container**
+
+```bash
+# Create a shared directory on the host
+mkdir -p /home/ali/pdf-parser-data/{uploads,batch_jobs_store,batch_processing}
+
+# Run the pdf-parser container
+docker run -d --name pdf-parser \
+  -e UPLOAD_DIR=/data/uploads \
+  -e BATCH_STORE_DIR=/data/batch_jobs_store \
+  -e BATCH_PROCESSING_DIR=/data/batch_processing \
+  -v /home/ali/pdf-parser-data:/data \
+  -p 8000:8000 \
+  pdf-parser:latest
+
+# Run a frontend container that reads the same outputs
+docker run -d --name frontend \
+  -v /home/ali/pdf-parser-data:/data:ro \
+  -p 3000:3000 \
+  your-frontend-image:latest
+```
+
+Both containers now share `/home/ali/pdf-parser-data` on the host; the frontend can read job status from `/data/batch_jobs_store/batch_jobs.json` and outputs from `/data/batch_processing/<job_id>/`.
+
 Send a curl request to the service
 ```bash
 curl -X POST http://localhost:8000/marker/upload -F "user=your-username" -F "file=@/path/to/pdf" -o output.json

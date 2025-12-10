@@ -27,12 +27,14 @@ RUN pip install --upgrade pip setuptools wheel && \
 
 # Copy application files into the image.
 COPY . .
+RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 8000
 
 # TCMalloc can be enabled by keeping the following env var.
 ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4
 
-# Start the marker server listening on all interfaces.
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["marker_server", "--host", "0.0.0.0", "--port", "8000"]
 
