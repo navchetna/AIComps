@@ -1,0 +1,16 @@
+services:
+  pdf-parser:
+    build: .
+    container_name: pdf-parser
+    ports:
+      - "8000:8000"
+    environment:
+      - UPLOAD_DIR=/data/uploads
+      - BATCH_STORE_DIR=/data/batch_jobs_store
+      - BATCH_PROCESSING_DIR=/data/batch_processing
+    volumes:
+      - ./uploads:/data/uploads
+      - ./batch_jobs_store:/data/batch_jobs_store
+      - ./batch_processing:/data/batch_processing
+    restart: unless-stopped
+

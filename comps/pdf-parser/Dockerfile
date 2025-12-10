@@ -22,6 +22,7 @@ COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel && \
     pip install -r requirements.txt && \
     pip install git+https://github.com/navchetna/marker.git@main && \
+    pip install --upgrade git+https://github.com/navchetna/marker.git@main && \
     pip install git+https://github.com/navchetna/surya.git && \
     pip install git+https://github.com/navchetna/tree-parser.git@alt && \
     pip install intel_extension_for_pytorch==2.8.0
