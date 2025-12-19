@@ -1,60 +1,84 @@
 # AI Reusable Components
 
-A collection of production-ready, modular AI components designed to accelerate the development of intelligent applications. This repository provides a comprehensive suite of pre-built components that handle common AI workflows, from document processing to content generation.
-
-## Overview
-
-This repository contains containerized, API-driven components that can be easily integrated into your AI applications. Each component is designed with scalability, reliability, and ease of use in mind, allowing developers to focus on building innovative solutions rather than implementing foundational AI capabilities from scratch.
-
-## Available Components
-
-### Document Processing
-- **PDF Parser** - Extract text, tables, and metadata from PDF documents with high accuracy
-- **OCR Engine** - Convert images and scanned documents to machine-readable text
-
-### Text Analytics
-- **Summarization** - Generate concise summaries from long-form text content
-- **Content Tagging** - Automatically extract and assign relevant tags to text
-
-## Key Features
-
-- **Containerized Deployment** - Each component runs in its own Docker container for easy deployment and scaling
-- **RESTful APIs** - Simple HTTP interfaces for seamless integration
-- **Configuration Management** - Environment-based configuration for different deployment scenarios
-- **Health Monitoring** - Built-in health checks and monitoring endpoints
-
-## Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd ai-components
-   ```
-
-2. **Choose your components**
-   ```bash
-   # Start individual components
-   docker-compose up summarization-service
-   docker-compose up pdf-parser-service
-   ```
-
-3. **Use the APIs**
-   ```bash
-   # Example: Summarize text
-   curl -X POST http://localhost:8080/v1/summarize \
-     -H "Content-Type: application/json" \
-     -d '{"text": "Your long text here..."}'
-   ```
+Production‑ready, modular AI components to accelerate document and text processing workflows. This monorepo organizes components by layers (input handling, model serving, tasks/services, reusable comps, and models) and provides containerized, API‑driven building blocks you can assemble into end‑to‑end applications.
 
 ## Requirements
 
-- Docker and Docker Compose
+- Docker (for containerized runs)
 - Python 3.10+ (for local development)
 
-## Contributing
+## What’s Inside
 
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details on how to submit improvements, bug fixes, and new components.
+| Layer | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| Input Handlers | [input-handlers](input-handlers) | Ingest and prepare inputs (PDFs, web pages) | Includes PDF parsing client, visualization tool, web crawler |
+| Model Serving | [model-serving](model-serving) | LLM and model inference services | Groq LLM gateway |
+| Tasks/Services | [tasks](tasks) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements |
+| Models | [models](models) | Model assets/configs (e.g., re-ranking) | For integration into services |
+<!-- | Reusable Comps | [comps](comps) | Standalone microservices/utilities (e.g., vector store) | Kubernetes manifests and Dockerfiles included | -->
 
-## License
+Below is a layer‑by‑layer, tabular index with paths and linkage to the utilities (e.g., PDF Parser, Dataprep).
 
-This project is licensed under the Apache License 2.0 - see the [LICENSE](./LICENSE) file for details.
+---
+
+## - Input Handlers
+
+| Component | What it Does | Usage |
+| --- | --- | --- |
+| PDF Parser | Client utilities to call a PDF parsing backend | [README](input-handlers/pdf/parser/README.md) |
+| PDF Viewer | A tool to visualize parsed content with RBAC enforcement | [Folder](input-handlers/pdf/viewer) |
+| Web Crawler | Crawl web content to feed downstream tasks | [Folder](input-handlers/web-crawler) |
+
+---
+
+## - Model Serving
+
+| Service | What it Does | Usage |
+| --- | --- | --- |
+| Groq LLM Service | Lightweight HTTP service for LLM inference via Groq | [README](model-serving/groq/README.md) |
+
+---
+
+## - Tasks / Services (Text)
+
+These are microservices for common RAG/text workflows. Each subfolder contains `Dockerfile`, `requirements`, and a runnable entrypoint in `src/`.
+
+| Task | What it Does | Usage |
+| --- | --- | --- |
+| Dataprep | Prepares/cleans text for downstream RAG | [README](tasks/text/dataprep/src/README.md) |
+| Retrievers | Retriever microservice to fetch context from the vector DB | [README](tasks/text/retrievers/src/README.md) |
+| Summarization | Summarize long content into concise outputs | [README](tasks/text/summarization/src/README.md) |
+| Tagging | Auto tag/label text content | [README](tasks/text/tagging/src/README.md) |
+
+Additional foundations for services live under [tasks/cores](tasks/cores):
+
+| Subsystem | Path | Purpose |
+| --- | --- | --- |
+| Orchestration (Mega) | [tasks/cores/mega](tasks/cores/mega) | Service orchestration, configs, CLI, and HTTP helpers |
+| Protocol & Data | [tasks/cores/proto](tasks/cores/proto) | Shared API protocol utilities and docarray helpers |
+| MCP Client | [tasks/cores/mcp](tasks/cores/mcp) | Model Context Protocol client + tooling |
+<!-- | Storage Adapters | [tasks/cores/storages](tasks/cores/storages) | Adapters for Redis, MongoDB, ArangoDB, etc. | -->
+
+
+---
+
+<!-- ## Reusable Components (Comps)
+
+| Component | What it Does | Usage |
+| --- | --- | --- |
+| Vector Store API | HTTP API for vector storage operations | [README](comps/vector-store/README.md) |
+| Vector Store Cleanup | Cleanup/maintenance jobs (e.g., via CronJob) | [README](comps/vector-store/README.md) |
+| K8s Manifests | Namespace, RBAC, API Deployment, CronJob | [README](comps/vector-store/README.md) |
+| PDF DataPrep Script | Utility script for PDF‑focused preparation workflows | [Script](comps/pdf-dataprep.py) |
+
+See component‑level docs: [comps/vector-store/README.md](comps/vector-store/README.md). -->
+<!-- 
+--- -->
+
+## - Models
+
+| Area | Path | Purpose |
+| --- | --- | --- |
+| Re‑ranking | [models/re-ranking](models/re-ranking) | Model configs/assets for re‑ranking components |
+
+---
