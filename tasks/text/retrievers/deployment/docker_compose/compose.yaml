@@ -1,0 +1,36 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+include:
+  - ../../../third_parties/qdrant/deployment/docker_compose/compose.yaml
+services:
+  retriever:
+    image: ${REGISTRY:-opea}/retriever:${TAG:-latest}
+    container_name: retriever
+    ports:
+      - "${RETRIEVER_PORT:-7000}:7000"
+    ipc: host
+    environment:
+      no_proxy: ${no_proxy}
+      http_proxy: ${http_proxy}
+      https_proxy: ${https_proxy}
+      INDEX_NAME: ${INDEX_NAME}
+      HF_TOKEN: ${HF_TOKEN}
+      LOGFLAG: ${LOGFLAG:-False}
+    restart: unless-stopped
+
+  retriever-qdrant:
+    extends: retriever
+    container_name: retriever-qdrant
+    environment:
+      RETRIEVER_COMPONENT_NAME: ${RETRIEVER_COMPONENT_NAME:-OPEA_RETRIEVER_QDRANT}
+      QDRANT_HOST: ${QDRANT_HOST}
+      QDRANT_PORT: ${QDRANT_PORT}
+      QDRANT_INDEX_NAME: ${INDEX_NAME}
+    depends_on:
+      qdrant-vector-db:
+        condition: service_healthy
+
+networks:
+  default:
+    driver: bridge
