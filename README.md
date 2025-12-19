@@ -39,7 +39,7 @@ Below is a layer‑by‑layer, tabular index with paths and linkage to the utili
 
 ---
 
-## - Tasks / Services (Text)
+## - Tasks / Services
 
 These are microservices for common RAG/text workflows. Each subfolder contains `Dockerfile`, `requirements`, and a runnable entrypoint in `src/`.
 
