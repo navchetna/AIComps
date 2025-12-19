@@ -1,6 +1,0 @@
-export SERVER_HOST_IP=10.138.186.78
-export LLM_SERVER_PORT=5099
-export LLM_MODEL_ID=llama-3.1-8b-instant
-export QDRANT_HOST=10.138.186.78
-export QDRANT_PORT=6339
-export EMBED_MODEL=BAAI/bge-base-en-v1.5

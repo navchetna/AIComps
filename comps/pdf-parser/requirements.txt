@@ -1,8 +1,0 @@
---index-url https://pypi.org/simple
-python-multipart==0.0.20
-uvicorn==0.37.0
-fastapi==0.117.1
-
-# switch to PyTorch CPU wheel index for torch
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.8.0
