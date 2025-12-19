@@ -77,8 +77,8 @@ See component‑level docs: [comps/vector-store/README.md](comps/vector-store/RE
 
 ## - Models
 
-| Area | Path | Purpose |
+| Area | Purpose | Usage |
 | --- | --- | --- |
-| Re‑ranking | [models/re-ranking](models/re-ranking) | Model configs/assets for re‑ranking components |
+| Re‑ranking | Model configs/assets for re‑ranking components | [models/re-ranking](models/re-ranking) | 
 
 ---
