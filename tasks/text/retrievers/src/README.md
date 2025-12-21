@@ -52,7 +52,7 @@ export TEI_EMBEDDING_ENDPOINT="http://${your_ip}:6060" # Optional
 cd ../../../ # to the project root dir (AIComps)
 ```
 ```bash
-docker build -t navchetna/retriever:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/retrievers/src/Dockerfile .
+docker build -t navchetna/retriever:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f cd tasks/text/retrievers/src/Dockerfile .
 ```
 
 ### 2.3 Run Docker with CLI
