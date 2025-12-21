@@ -42,7 +42,7 @@ export LLM_MODEL_ID=llama-3.1-8b-instant
 cd ../../../../ # to the project root dir (AIComps)
 ```
 ```bash
-docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f comps/dataprep/src/Dockerfile .
+docker build -t navchetna/dataprep:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f tasks/text/dataprep/src/Dockerfile .
 ```
 
 ### Run Docker with CLI
