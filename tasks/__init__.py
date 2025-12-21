@@ -6,7 +6,7 @@
 import os
 
 # Document
-from cores.proto.docarray import (
+from .cores.proto.docarray import (
     Audio2TextDoc,
     Base64ByteStrDoc,
     DocPath,
@@ -41,21 +41,21 @@ from cores.proto.docarray import (
 )
 
 # Constants
-from cores.mega.constants import MegaServiceEndpoint, ServiceRoleType, ServiceType
+from .cores.mega.constants import MegaServiceEndpoint, ServiceRoleType, ServiceType
 
 # Microservice
-from cores.mega.orchestrator import ServiceOrchestrator
-from cores.mega.orchestrator_with_yaml import ServiceOrchestratorWithYaml
-from cores.mega.micro_service import MicroService, register_microservice, opea_microservices
+from .cores.mega.orchestrator import ServiceOrchestrator
+from .cores.mega.orchestrator_with_yaml import ServiceOrchestratorWithYaml
+from .cores.mega.micro_service import MicroService, register_microservice, opea_microservices
 
 # Telemetry
-from cores.telemetry.opea_telemetry import opea_telemetry
+from .cores.telemetry.opea_telemetry import opea_telemetry
 
 # Common
-from cores.common.component import OpeaComponent, OpeaComponentRegistry, OpeaComponentLoader
+from .cores.common.component import OpeaComponent, OpeaComponentRegistry, OpeaComponentLoader
 
 # Statistics
-from cores.mega.base_statistics import statistics_dict, register_statistics
+from .cores.mega.base_statistics import statistics_dict, register_statistics
 
 # Logger
-from cores.mega.logger import CustomLogger
+from .cores.mega.logger import CustomLogger

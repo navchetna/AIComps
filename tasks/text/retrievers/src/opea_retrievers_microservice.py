@@ -8,7 +8,7 @@ from typing import Union
 
 
 # import for retrievers component registration
-from integrations.qdrant import OpeaQDrantRetriever
+from .integrations.qdrant import OpeaQDrantRetriever
 
 from AIComps.tasks import (
     CustomLogger,
@@ -24,7 +24,7 @@ from AIComps.tasks import (
     register_statistics,
     statistics_dict,
 )
-from comps.cores.proto.api_protocol import (
+from AIComps.tasks.cores.proto.api_protocol import (
     ChatCompletionRequest,
     RetrievalRequest,
     RetrievalRequestArangoDB,
