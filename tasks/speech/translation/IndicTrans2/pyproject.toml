@@ -1,0 +1,34 @@
+[project]
+name = "indictrans2"
+version = "0.1.0"
+description = "Simple API for IndicTrans2 translation model"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.127.0",
+    "transformers==4.52.0",
+    "torch==2.8.0",
+    "uvicorn>=0.38.0",
+    "torchaudio==2.8.0",
+    "intel-extension-for-pytorch==2.8.0",
+    "setuptools>=80.9.0",
+    "indictranstoolkit",
+    "sentencepiece>=0.2.1",
+    "loguru>=0.7.3",
+]
+
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu" },
+]
+torchaudio = [
+  { index = "pytorch-cpu" },
+]
+indictranstoolkit = { git = "https://github.com/VarunGumma/IndicTransToolkit" }
+
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

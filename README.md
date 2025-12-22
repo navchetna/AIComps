@@ -60,6 +60,7 @@ These are microservices for common RAG/text workflows. Each subfolder contains `
 | Task | Description | Usage |
 | --- | --- | --- |
 | ASR (Audio-Speech-Recognition) | Convert speech to text | [README](tasks/speech/asr/Wav2vec2/README.md) |
+| Translation | For Indic translations | [README](tasks/speech/translation/IndicTrans2/README.md) |
 | TTS (Text-to-Speech) | Convert text to speech | [README](tasks/speech/text2speech/fastspeech2_HS/README.md) |
 
 ### Video
