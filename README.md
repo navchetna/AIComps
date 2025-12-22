@@ -36,7 +36,7 @@ Below is a layer‑by‑layer, tabular index with paths and linkage to the utili
 | Service | Description | Usage |
 | --- | --- | --- |
 | Groq | Lightweight HTTP service for LLM inference via Groq | [README](model-serving/groq/README.md) |
-| vLLM | A **high-throughput** framework designed for LLM inference and serving | - |
+| vLLM | A **high-throughput** framework designed for LLM inference and serving | [README](model-serving/vLLM/README.md) |
 | Ollama | Open-source platform designed to run large language models **locally** | [README](model-serving/ollama/README.md) |
 
 ---
