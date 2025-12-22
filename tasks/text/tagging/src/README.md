@@ -32,35 +32,20 @@ We recommend using `uv` for fast and reliable package management:
 
 **Option 1: Using uv (Recommended)**
 ```bash
-# Create virtual environment
+cd AIComps/tasks/text/tagging/src/
+# Create virtual environment and activate
 uv venv
-
 # Activate virtual environment
-# On macOS/Linux:
 source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
 
 # Install dependencies
 uv pip install -r requirements.txt
 ```
 
-**Option 2: Using traditional pip**
-```bash
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
 ### Environment Setup
+> **Note:** You need to ensure that you have an LLM service running.  
+- Option 1: [Spin up a Groq service](../../../../model-serving/groq/README.md)
+- Option 2: [Spin up a vLLM service](../../../../model-serving/vLLM/README.md)
 
 Create a `.env` file in your project root:
 
@@ -68,8 +53,8 @@ Create a `.env` file in your project root:
 # Choose EITHER one
 # OpenAI-compatible hosted model
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_API_BASE=https://api.openai.com/v1
-MODEL_NAME=meta-llama/Llama-3.1-8B-Instruct
+OPENAI_API_BASE=http://localhost:8000/v1 # hosted vllm service
+MODEL_NAME=meta-llama/Llama-3.2-1B-Instruct
 
 # Groq
 GROQ_API_KEY=your_groq_api_key_here
@@ -77,6 +62,13 @@ GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 > **Note:** `prompt` and `num_tags` are configured per request, not in environment variables.
+
+## Development & Testing (Python)
+
+The Python scripts are intended for development and testing. You can either:
+
+- Run the service directly via `main.py` for a quick local start
+- Use `uvicorn` to run the FastAPI app, which exposes the HTTP endpoint
 
 ### Launch the Service
 
@@ -90,11 +82,13 @@ python main.py
 uvicorn main:app --reload
 ```
 
-**Service will be available at:*p* `http://127.0.0.1:8000`
+**Service will be available at:** `http://127.0.0.1:8000`
 
 ---
 
-## Docker Deployment
+## Deployment (Docker)
+
+For deployment, Docker is the supported option. Use the steps below to containerize and run the service.
 
 ### Building as a Component
 
@@ -103,7 +97,7 @@ For production deployments or component-based architectures, you can containeriz
 #### Build the Docker Image
 
 ```bash
-cd tagging/src
+cd AIComps/tasks/text/tagging/src
 
 # Build with proxy support (if needed)
 docker buildx build \

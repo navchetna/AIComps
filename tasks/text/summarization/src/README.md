@@ -32,7 +32,7 @@ We recommend using `uv` for fast and reliable package management:
 **Option 1: Using uv (Recommended)**
 ```bash
 # Create virtual environment
-uv venv --python 3.10
+uv venv --python=3.10
 
 # Activate virtual environment
 # On macOS/Linux:
@@ -42,29 +42,21 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-**Option 2: Using traditional pip**
-```bash
-# Create virtual environment
-python -m venv .venv
-
-# Activate virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
 
 ### Environment Setup
 
 Create a `.env` file in your project root:
 
+> **Note:** You need to ensure that you have an LLM service running.  
+- Option 1: [Spin up a Groq service](../../../../model-serving/groq/README.md)
+- Option 2: [Spin up a vLLM service](../../../../model-serving/vLLM/README.md)
+
 ```bash
 # Comment out the service you do not want to use!
 # 1. OpenAI-compatible hosted model
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_API_BASE=https://api.openai.com/v1
-MODEL_NAME=gpt-4o-mini
+OPENAI_API_BASE=http://localhost:8000/v1 # hosted vllm service
+MODEL_NAME=meta-llama/Llama-3.2-1B-Instruct
 
 # 2. Groq
 GROQ_API_KEY=your_groq_api_key_here
@@ -72,6 +64,13 @@ GROQ_MODEL=llama-3.3-70b-versatile
 ```
 
 > **Note:** `prompt` and `word_limit` are configured per request, not in environment variables.
+
+## Development & Testing (Python)
+
+The Python scripts are intended for development and testing. You can either:
+
+- Run the service directly via `main.py` for a quick local start
+- Use `uvicorn` to run the FastAPI app, which exposes the HTTP endpoint
 
 ### Launch the Service
 
@@ -88,15 +87,17 @@ uvicorn main:app --reload
 
 ---
 
-# Docker Deployment
+## Deployment (Docker)
 
-## Building as a Component
+For deployment, Docker is the supported option. Use the steps below to containerize and run the service.
+
+### Building as a Component
 For production deployments or component-based architectures, you can containerize the service:
 
 
 Build with proxy support (if needed)
 ```bash
-cd summarization/src
+cd AIComps/tasks/text/summarization/src
 docker buildx build --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg https_proxy=$HTTPS_PROXY --build-arg http_proxy=$HTTP_PROXY -t summarization-service -f /path/to/your/Dockerfile .
 ```
 Run the Container
