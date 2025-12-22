@@ -34,7 +34,7 @@ cd AIComps/model-serving/groq
 
 # Create and activate env
 uv venv --python=3.12
-source venv/bin/activate
+source .venv/bin/activate
 uv pip install -r requirements.txt
 
 # export env vars
