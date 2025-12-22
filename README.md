@@ -12,7 +12,7 @@ Production‑ready, modular AI components to accelerate document and text proces
 | Layer | Path | Purpose | Notes |
 | --- | --- | --- | --- |
 | Input Handlers | [input-handlers](input-handlers) | Ingest and prepare inputs (PDFs, web pages) | Includes PDF parsing client, visualization tool, web crawler |
-| Model Serving | [model-serving](model-serving) | LLM and model inference services | Groq LLM gateway |
+| Model Serving | [model-serving](model-serving) | LLM and model inference services | Multiple serving engines: Groq, vLLM, Ollama |
 | Tasks/Services | [tasks](tasks) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements |
 | Models | [models](models) | Model assets/configs (e.g., re-ranking) | For integration into services |
 <!-- | Reusable Comps | [comps](comps) | Standalone microservices/utilities (e.g., vector store) | Kubernetes manifests and Dockerfiles included | -->
