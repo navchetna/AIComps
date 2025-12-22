@@ -60,6 +60,22 @@ docker run -d -p 8000:8000 \
     --disable-sliding-window
 ```
 
+## Test the API
+
+After the server is running, you can hit the OpenAI-compatible completions endpoint with curl:
+
+```bash
+curl http://localhost:8000/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+        "model": "meta-llama/Llama-3.2-1B-Instruct",
+        "prompt": "San Francisco is a",
+        "max_tokens": 7,
+        "temperature": 0
+    }'
+```
+
+
 ## Environment Variables
 
 ### VLLM_CPU_KVCACHE_SPACE
