@@ -4,7 +4,6 @@
 
 1. [Start Microservice with Docker](#start-microservice-with-docker)
 2. [Invoke Microservice](#invoke-microservice)
-3. [Running in the air gapped environment](#running-in-the-air-gapped-environment)
 
 ## 🚀Start Microservice with Docker
 
@@ -20,7 +19,7 @@ http://localhost:6333/dashboard
 ---
 
 > **Note:** You need to ensure that you have an LLM service running (for table description).  
-> See: [How to spin up a Groq service](../../groq/README.md)
+> See: [How to spin up a Groq service](../../../../model-serving/groq/README.md)
 
 ### Setup Environment Variables
 ```bash
@@ -28,7 +27,6 @@ export no_proxy=${your_no_proxy}
 export http_proxy=${your_http_proxy}
 export https_proxy=${your_https_proxy}
 export COLLECTION_NAME=rag-qdrant
-export PYTHONPATH=/path/to/AIComps
 
 # LLM service configuration
 export LLM_SERVER_HOST_IP=localhost
@@ -114,8 +112,3 @@ curl -X POST \
     -F "table_strategy=hq" \
     http://localhost:5000/v1/dataprep/ingest
 ```
-
-## Running in the air gapped environment
-
-Please follow the [common guide](../README.md#running-in-the-air-gapped-environment) to run dataprep microservice in the air gapped environment.
-
