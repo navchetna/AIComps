@@ -12,7 +12,7 @@ import { SessionModel } from './models/Session';
 import { DocumentModel } from './models/Document';
 
 const app: Application = express();
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(cors({

@@ -34,7 +34,7 @@ fi
 
 # Create BMRA-Admins group
 echo "Creating BMRA-Admins group..."
-BMRA_RESPONSE=$(curl -s -X POST http://localhost:5002/api/admin/groups \
+BMRA_RESPONSE=$(curl -s -X POST http://localhost:5001/api/admin/groups \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -48,7 +48,7 @@ echo "$BMRA_RESPONSE" | jq '.'
 # Create Tender-Team group
 echo ""
 echo "Creating Tender-Team group..."
-TENDER_RESPONSE=$(curl -s -X POST http://localhost:5002/api/admin/groups \
+TENDER_RESPONSE=$(curl -s -X POST http://localhost:5001/api/admin/groups \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
