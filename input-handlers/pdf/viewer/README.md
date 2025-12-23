@@ -26,104 +26,152 @@ DocFlow provides a complete solution for managing document access with:
 - **Document Viewer** - Browse and view parsed document structures
 - **Dark Mode** - Full dark/light theme support
 
-## Quick Start
 
-### Prerequisites
+# Quick Start
 
-- Node.js 22+
-- MongoDB running on `localhost:27017`
-- PDF processing results in `~/pdf-results` directory
+## Prerequisites
 
-### Installation Steps
+### 1) Node.js Installation
+Install the latest version of Node.js from [nodejs.org](https://nodejs.org/en/download)
 
+- Select **Node.js v**. **(LTS)**
+- Platform: **Linux**
+- Installation method: **nvm**
+- Package manager: **npm**
+
+Follow the installation steps provided for your system.
+
+### 2) MongoDB Setup
+MongoDB must be running on `localhost:27017`
+
+Start MongoDB using Docker:
 ```bash
-# 1. Install backend dependencies
-cd backend
+docker run --name doc-flow-mongo -d -p 27017:27017 mongo:latest
+```
+
+### 3) Directory Setup
+Ensure PDF processing results are available in the `~/pdf-results` directory.
+
+---
+
+## Installation Steps - Development
+
+### Backend Setup
+```bash
+cd AIComps/input-handlers/pdf/viewer/backend
+
+# Install dependencies
 npm install
 
-# 2. Initialize admin user and group
+# Initialize admin user and group
 npm run init-admin
 
-# 3. Initialize documents with admin permissions
+# Initialize documents with admin permissions
+# Set environment variables for PDF directories
+export PDF_RESULTS_DIR=/path/to/pdf-results  # Outputs of the PDF parser
+export PDFS_DIR=/path/to/pdfs-dir            # Directory containing PDFs to render
 npm run init-docs
 
-# 4. Start backend server
+# Start backend server
 npm run dev
 ```
 
-In a new terminal:
+### Frontend Setup
 
+Open a new terminal and run:
 ```bash
-# 5. Install frontend dependencies
-cd frontend
+cd AIComps/input-handlers/pdf/viewer/frontend
+
+# Install dependencies
 npm install
 
-# 6. Configure environment
-NEXT_PUBLIC_API_URL=http://10.0.224.193:5001
+# Configure environment variable
+export NEXT_PUBLIC_API_URL=http://localhost:5001
 
-# 7. Start frontend
+# Start frontend
 npm run dev
 ```
 
-### First Login
+---
 
-1. Navigate to `http://localhost:3000`
-2. Click "Login"
-3. Enter credentials:
+## Accessing the Application via Remote Server
+
+To access the application hosted on a remote server through a jump server, use SSH tunneling.
+> Note: This would apply even with the Docker setup
+### SSH Tunneling Format
+```bash
+ssh -L <frontend_client_port>:localhost:<frontend_server_port> \
+    -L <backend_client_port>:localhost:<backend_server_port> \
+    -J <jumperserver_username>@<jump_ip>:<jump_port> \
+    <remoteserver_username>@<remoteserver_ip>
+```
+
+### Example Command
+```bash
+ssh -L 3000:localhost:3000 \
+    -L 5001:localhost:5001 \
+    -J ritik@192.xxx.xxx.xxx:65001 \
+    ritik@10.0.xxx.xxx
+```
+
+Once connected, access the application at: **http://localhost:3000**
+
+---
+
+## First Login
+
+1. Navigate to **http://localhost:3000**
+2. Click **Login**
+3. Enter the default credentials:
    - **Username**: `admin`
    - **Password**: `admin123`
 4. You're in! 🎉
 
-⚠️ **Important:** Change the default admin password immediately in production!
+**Change the default admin password immediately in production environments!**
 
 
-## Initial Setup - Development
+## Docker Deployment
 
-### Step 1: Initialize Admin User
+### Environment Setup
 
-This creates the admin user and admin group:
+Use the deployment script at [install/build.sh](install/build.sh).
 
-```bash
-cd backend
-npm run init-admin
-```
+- On first run, the script copies `.env.example` to `.env`.
+- Edit `.env` to set required values before building (by running the script once again):
+  - `NEXT_PUBLIC_API_URL`
+  - `FRONTEND_URL`
+  - `MONGODB_URI`
+  - `PDF_RESULTS_HOST_PATH`
+  - `PDFS_HOST_PATH`
 
-**Output:**
-```
-✅ Admin group created with ID: 692546aead66512cf9d88149
-✅ Admin user created with ID: 692546aead66512cf9d8814a
 
-⚠️  DEFAULT CREDENTIALS:
-   Username: admin
-   Password: admin123
-```
-
-### Step 2: Initialize Documents
-
-This scans the outputs directory and creates document records:
+### Build and Run
 
 ```bash
-npm run init-docs
+cd AIComps/input-handlers/pdf/viewer/install
+
+# Build and start all services via the script -> run twice if .env is not present
+./build.sh
+
+# Start services
+docker compose up
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
 ```
 
-**What this does:**
-- Scans `/home/intel/pdf-results/ervin/outputs/` for document folders
-- Creates a database record for each document
-- Automatically grants the admin group access to all documents
+### Access the Application
 
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5001
+- **Health Check**: http://localhost:5001/health
+---
 
-### Step 3: Start Services
-
-```bash
-# Backend (in backend directory)
-npm run dev  # Runs on http://localhost:5001
-
-# Frontend (in frontend directory)
-npm run dev  # Runs on http://localhost:3000
-```
-
+# Additional Documentation
 ## User Management
-
 ### Permission Model
 
 ```
@@ -149,7 +197,7 @@ User can access Document IF:
   User.groupIds ∩ Document.permissions.groupIds ≠ ∅
 ```
 
-### Complete Workflow Example
+### Complete Workflow Example - API Documentation
 
 #### 1. Login as Admin
 
@@ -302,132 +350,6 @@ Alice will only see documents that the Engineering group has access to.
 3. Uncheck to revoke access
 4. Changes save automatically
 
-## Docker Deployment
-
-### Environment Setup
-
-Create `.env` file in the install directory:
-
-```env
-# For local development
-NEXT_PUBLIC_API_URL=http://localhost:5001
-FRONTEND_URL=http://localhost:3000
-
-# For server deployment (example)
-# NEXT_PUBLIC_API_URL=http://10.0.224.193:5001
-# FRONTEND_URL=http://10.0.224.193:3000
-```
-
-### Build and Run
-
-```bash
-cd install
-
-# Build and start all services
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-### Access the Application
-
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5001
-- **Health Check**: http://localhost:5001/health
-
-### Production Deployment
-
-For server deployment at a specific IP (e.g., 10.138.190.67):
-
-```bash
-# Create .env
-cat > .env << EOF
-NEXT_PUBLIC_API_URL=http://10.138.190.67:5001
-FRONTEND_URL=http://10.138.190.67:3000
-EOF
-
-# Build with environment variables
-docker-compose up --build -d
-```
-
-**Important:** `NEXT_PUBLIC_API_URL` is embedded at build time. To change it, you must rebuild the frontend image.
-
-## Development
-
-### Backend Development
-
-```bash
-cd backend
-
-# Development mode with auto-reload
-npm run dev
-
-# Build TypeScript
-npm run build
-
-# Production mode
-npm start
-
-# Initialize admin
-npm run init-admin
-
-# Initialize documents
-npm run init-docs
-```
-
-### Frontend Development
-
-```bash
-cd frontend
-
-# Development mode
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Type checking
-npm run type-check
-
-# Linting
-npm run lint
-```
-
-## Security
-
-### Best Practices
-
-1. **Change Default Passwords**
-   - Immediately change the admin password after initialization
-   - Use strong passwords (min 12 characters, mixed case, numbers, symbols)
-
-2. **Environment Variables**
-   - Never commit `.env` files
-   - Use different credentials for development and production
-   - Rotate session secrets regularly
-
-3. **HTTPS in Production**
-   - Always use HTTPS/TLS in production
-   - Configure proper SSL certificates
-   - Enable HSTS headers
-
-4. **Session Management**
-   - Sessions expire after 24 hours
-   - Tokens are validated on every request
-   - Auto-logout on token expiration
-
-5. **Access Control**
-   - Follow principle of least privilege
-   - Regular audit of user permissions
-   - Remove inactive users promptly
-
 
 ## Troubleshooting
 
@@ -445,7 +367,7 @@ npm run lint
 **Problem:** Documents don't show up after scanning
 
 **Solutions:**
-1. Verify PDF output folders exist in `/home/intel/pdf-results/ervin/outputs/`
+1. Verify PDF output folders exist in `~/pdf-results/ervin/outputs/`
 2. Run `npm run init-docs` to scan for new documents
 3. Check file permissions on the outputs directory
 4. Review backend logs for errors
@@ -462,7 +384,7 @@ npm run lint
 ### Create a New Project Team
 
 1. **Create group** (Admin Panel → Groups → Add Group)
-   - Example: "Project Phoenix"
+   - Example: "Project Unnati"
 2. **Assign users to group** (Admin Panel → Users → Edit → Check group)
 3. **Grant document access** (Admin Panel → Documents → Expand → Check group)
 4. **Team members can now access** project documents
@@ -473,22 +395,4 @@ npm run lint
 2. **Scan for documents** (Admin Panel → Documents → Scan for Documents)
 3. **Add discovered documents** (Click "Add" for each)
 4. **Assign permissions** (Expand document → Check groups)
-
-### Audit User Access
-
-1. **View user details** (`GET /api/admin/users/:userId`)
-2. **Check group memberships** (shown in response)
-3. **For each group, list documents** (`GET /api/admin/documents`)
-4. **Filter by permissions.groupId** in the response
-
-## Support
-
-### Documentation Files
-
-- This README - Complete system guide
-- `backend/src/` - Backend source code with inline comments
-- `frontend/app/` - Frontend pages and components
-
-
-**Built with:** Node.js, TypeScript, Next.js, MongoDB, Express
 
