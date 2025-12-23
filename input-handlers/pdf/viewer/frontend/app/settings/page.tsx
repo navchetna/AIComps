@@ -20,7 +20,7 @@ import { UserMenu } from '@/components/UserMenu'
 import { useAuth } from '@/contexts/AuthContext'
 import ProtectedRoute from '@/components/ProtectedRoute'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'
 
 type SettingsTab = 'profile' | 'security' | 'appearance' | 'admin'
 
