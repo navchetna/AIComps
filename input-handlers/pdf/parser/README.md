@@ -18,7 +18,7 @@
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/navchetna/AIComps.git
-cd AIComps/comps/pdf-parser
+cd AIComps/input-handlers/pdf/parser/
 ```
 
 ### 2. Set Up UV Package Manager
@@ -82,9 +82,14 @@ Start the application
 marker_server --host=0.0.0.0 --port=8000
 ```
 
+Download a sample PDF to test
+```bash
+curl -O https://www.intel.com/content/dam/www/central-libraries/us/en/documents/2024-05/intel-xeon-6-product-brief.pdf
+```
+
 Send a curl request to the service
 ```bash
-curl -X POST http://localhost:8000/marker/upload -F "user=your-username" -F "file=@/path/to/pdf" -o output.json
+curl -X POST http://localhost:8000/marker/upload -F "user=<your-username>" -F "file=@AIComps/input-handlers/pdf/parser/intel-xeon-6-product-brief.pdf" -o output.json
 ```
 The output will be saved to 'output.json'
 
