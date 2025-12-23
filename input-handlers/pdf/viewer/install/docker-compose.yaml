@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   mongodb:
-    image: mongo:7.0
+    image: mongo:latest
     container_name: doc-flow-mongo
     ports:
       - "27017:27017"
