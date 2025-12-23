@@ -38,12 +38,12 @@ This will:
 ### Start the Backend Server
 
 ```bash
-MONGODB_URI=mongodb://localhost:27011 PORT=5002 npm run dev
+MONGODB_URI=mongodb://localhost:27011 PORT=5001 npm run dev
 ```
 
 The backend will:
 - Connect to MongoDB on localhost:27011
-- Run on port 5002
+- Run on port 5001
 - Auto-reload on file changes (using nodemon)
 
 ## Step 2: Frontend Setup
@@ -57,7 +57,7 @@ npm run dev
 The frontend will:
 - Run on port 3000 (default Next.js port)
 - Auto-reload on file changes (hot module replacement)
-- Connect to backend API at http://localhost:5002
+- Connect to backend API at http://localhost:5001
 
 ## Step 3: Verify Everything is Running
 
@@ -65,7 +65,7 @@ Open a third terminal to test:
 
 ```bash
 # Check backend health
-curl http://localhost:5002/api/health
+curl http://localhost:5001/api/health
 
 # Check frontend
 curl http://localhost:3000
