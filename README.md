@@ -7,21 +7,20 @@ Production‑ready, modular AI components to accelerate document and text proces
 - Docker (for containerized runs)
 - Python 3.10+
 
-## What’s Inside
+## What's Inside
 
-| Layer | Path | Purpose | Notes |
+| Layer | Purpose | Notes | Usage |
 | --- | --- | --- | --- |
-| Input Handlers | [input-handlers](input-handlers) | Ingest and prepare inputs (PDFs, web pages) | Includes PDF parsing client, visualization tool, web crawler |
-| Model Serving | [model-serving](model-serving) | LLM and model inference services | Multiple serving engines: Groq, vLLM, Ollama |
-| Tasks/Services | [tasks](tasks) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements |
-| Models | [models](models) | Model assets/configs (e.g., re-ranking) | For integration into services |
-<!-- | Reusable Comps | [comps](comps) | Standalone microservices/utilities (e.g., vector store) | Kubernetes manifests and Dockerfiles included | -->
+| [Input Handlers](input-handlers/README.md) | Ingest and prepare inputs (PDFs, web pages) | PDF parsing client + viewer tooling | [README](input-handlers/README.md) |
+| [Model Serving](model-serving/README.md) | LLM and model inference services | Serving engines: Groq, vLLM, Ollama | [README](model-serving/README.md) |
+| [Tasks/Services](tasks/README.md) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements | [README](tasks/README.md) |
+| [Reusable Comps](comps/README.md) | Standalone microservices/utilities (e.g., vector store) | K8s manifests and Dockerfiles included | [README](comps/README.md) |
 
-Below is a layer‑by‑layer, tabular index with paths and linkage to the utilities (e.g., PDF Parser, Dataprep).
+Here’s what each of the layers include, with links to the relevant READMEs.
 
 ---
 
-## - Input Handlers
+## [Input Handlers](input-handlers/README.md)
 
 | Component | Description | Usage |
 | --- | --- | --- |
@@ -31,7 +30,7 @@ Below is a layer‑by‑layer, tabular index with paths and linkage to the utili
 
 ---
 
-## - Model Serving
+## [Model Serving](model-serving/README.md)
 
 | Service | Description | Usage |
 | --- | --- | --- |
@@ -41,11 +40,11 @@ Below is a layer‑by‑layer, tabular index with paths and linkage to the utili
 
 ---
 
-## - Tasks / Services
+## [Tasks / Services](tasks/README.md)
 
 These are microservices for common RAG/text workflows. Each subfolder contains `Dockerfile`, `requirements`, and a runnable entrypoint in `src/`.
 
-### Text
+### - Text
 
 | Task | Description | Usage |
 | --- | --- | --- |
@@ -55,7 +54,7 @@ These are microservices for common RAG/text workflows. Each subfolder contains `
 | Tagging | Auto tag/label text content | [README](tasks/text/tagging/src/README.md) |
 
 
-### Speech
+### - Speech
 
 | Task | Description | Usage |
 | --- | --- | --- |
@@ -63,17 +62,17 @@ These are microservices for common RAG/text workflows. Each subfolder contains `
 | Translation | For Indic translations | [README](tasks/speech/translation/IndicTrans2/README.md) |
 | TTS (Text-to-Speech) | Convert text to speech | [README](tasks/speech/text2speech/fastspeech2_HS/README.md) |
 
-### Video
-
-| Task | Description | Usage |
-| --- | --- | --- |
-| Coming Soon | - | - |
-
-### Images
+### - Images
 
 | Task | Description | Usage |
 | --- | --- | --- |
 | Scene Description | Use vision models to describe content from images | - |
+
+### - Video
+
+| Task | Description | Usage |
+| --- | --- | --- |
+| Coming Soon | - | - |
 
 <!-- Additional foundations for services live under [tasks/cores](tasks/cores):
 
@@ -100,7 +99,7 @@ See component‑level docs: [comps/vector-store/README.md](comps/vector-store/RE
 <!-- 
 --- -->
 
-## - Models
+## Models
 
 | Area | Purpose | Usage |
 | --- | --- | --- |
