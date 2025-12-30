@@ -11,7 +11,7 @@
 #### Build image
 ```bash
 cd AIComps;
-docker buildx build --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -t navchetna/groq:latest -f comps/groq/Dockerfile .;
+docker buildx build --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -t navchetna/groq:latest -f model-serving/groq/Dockerfile .;
 ```
 
 #### Run container

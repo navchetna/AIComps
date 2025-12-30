@@ -5,7 +5,7 @@ import json
 import os
 
 from AIComps.tasks import  MicroService, ServiceRoleType
-from comps.cores.proto.api_protocol import (
+from AIComps.tasks.cores.proto.api_protocol import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatCompletionResponseChoice,
