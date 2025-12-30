@@ -4,7 +4,7 @@ This layer provides model/LLM inference services exposed over HTTP. Each service
 
 ## Contents
 
-| Service | Description | Docs |
+| Service | Description | Usage |
 | --- | --- | --- |
 | Groq | Lightweight HTTP service for Groq-backed chat/completions | [README](groq/README.md) |
 | vLLM | Notes and setup for serving models via vLLM | [README](vLLM/README.md) |

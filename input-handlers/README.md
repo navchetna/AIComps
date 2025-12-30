@@ -4,7 +4,7 @@ This layer contains utilities that ingest raw inputs and produce structured outp
 
 ## Contents
 
-| Component | Description | Docs |
+| Component | Description | Usage |
 | --- | --- | --- |
 | PDF Parser | Client utilities to call a PDF parsing backend and normalize its response | [README](pdf/parser/README.md) |
 | PDF Viewer | Viewer app to visualize parsed PDF content | [README](pdf/viewer/README.md) |
