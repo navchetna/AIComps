@@ -1,4 +1,4 @@
-# vLLM Performance Guide for Intel® Xeon® 6
+# vLLM Performance Guide for Intel® Xeon® 6 (using Docker)
 
 This guide provides an optimized workflow for deploying vLLM on Intel® Xeon® 6 processors. It leverages **Intel® Advanced Matrix Extensions (AMX)** and **AVX-512** to achieve up to **2x throughput improvement** over standard installations.
 
