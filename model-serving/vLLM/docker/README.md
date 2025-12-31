@@ -8,7 +8,14 @@ This guide provides an optimized workflow for deploying vLLM on Intel® Xeon® 6
 - Model Access: This guide uses `Qwen/Qwen2.5-1.5B-Instruct`. If you choose to use gated models (e.g., Llama 3.2), ensure you have requested access on Hugging Face and have a valid Access Token.
 - Architecture: Optimized for Intel Xeon 6 (Granite Rapids) with SNC3 (Sub-NUMA Clustering) enabled.
 
-## Installation Methods
+## Installation
+
+## Clone **vLLM**
+
+```bash
+git clone https://github.com/vllm-project/vllm.git vllm_source
+cd vllm_source
+```
 
 ### Optimized Docker Build
 
