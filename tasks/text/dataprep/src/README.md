@@ -49,7 +49,7 @@ For local development without Docker, follow these steps:
 
 1. **Install `uv`**
 2. **Create a virtual environment with uv**
-3. **Install the AIComps package** from the root directory
+3. **Install the AIComps package** from the root directory. See: [Install AIComps](../../../../README.md#installation)
 
 ### Install Dependencies
 
