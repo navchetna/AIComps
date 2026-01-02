@@ -1,0 +1,136 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "AIComps"
+version = "1.4"
+description = "Production-ready, modular AI components to accelerate document and text processing workflows"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+    {name = "Intel Corporation"}
+]
+keywords = ["ai", "components", "rag", "llm", "microservices", "fastapi", "document-processing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# Core dependencies required for the base package
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.38.0",
+    "pydantic>=2.10.0",
+    "docarray>=0.40.0",
+    "requests>=2.32.0",
+    "pyyaml>=6.0.0",
+    "numpy>=2.0.0",
+    "opentelemetry-api>=1.38.0",
+    "opentelemetry-sdk>=1.38.0",
+    "opentelemetry-exporter-otlp>=1.38.0",
+    "prometheus-client>=0.21.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
+    "shortuuid>=1.0.0",
+    "rich>=14.0.0",
+    "orjson>=3.11.0",
+]
+
+[project.optional-dependencies]
+# Model serving extras
+groq = [
+    "groq>=0.18.0",
+]
+
+# Vector store extras
+vectorstore = [
+    "kubernetes>=34.0.0",
+    "python-dotenv>=1.2.0",
+]
+
+# Storage backends
+storage = [
+    "redis>=5.0.0",
+    "pymongo>=4.0.0",
+    "python-arango>=8.0.0",
+]
+
+# Text processing tasks
+text = [
+    "langchain>=0.1.0",
+    "langchain-community>=0.0.20",
+    "sentence-transformers>=2.0.0",
+    "transformers>=4.35.0",
+]
+
+# Speech processing tasks
+speech = [
+    "torch>=2.0.0",
+    "torchaudio>=2.0.0",
+    "soundfile>=0.12.0",
+]
+
+# PDF processing
+pdf = [
+    "pypdf>=3.0.0",
+    "pdfplumber>=0.10.0",
+    "pillow>=10.0.0",
+]
+
+# Development dependencies
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=24.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
+# All extras combined
+all = [
+    "AIComps[groq,vectorstore,storage,text,speech,pdf]",
+]
+
+[project.urls]
+Homepage = "https://github.com/intel/AIComps"
+Documentation = "https://github.com/intel/AIComps/blob/main/README.md"
+Repository = "https://github.com/intel/AIComps"
+Issues = "https://github.com/intel/AIComps/issues"
+
+[tool.setuptools]
+# Package discovery is handled by setup.py
+# This directory contains __init__.py making it a package itself
+
+[tool.setuptools.package-data]
+"*" = ["**/*.yaml", "**/*.yml", "**/*.json"]
+
+[tool.black]
+line-length = 120
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]

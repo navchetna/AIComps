@@ -16,10 +16,21 @@ Production‑ready, modular AI components to accelerate document and text proces
 | [Tasks/Services](tasks/README.md) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements | [README](tasks/README.md) |
 | [Reusable Comps](comps/README.md) | Standalone microservices/utilities (e.g., vector store) | K8s manifests and Dockerfiles included | [README](comps/README.md) |
 
-Here’s what each of the layers include, with links to the relevant READMEs.
+Here's what each of the layers include, with links to the relevant READMEs.
 
 ---
+## Installation
 
+To use these components as a package in your projects, install AIComps in editable mode:
+
+```bash
+cd AIComps/
+uv pip install -e .
+```
+
+After installation, you can navigate into any of the layers (input-handlers, model-serving, tasks, comps) and follow their respective READMEs for detailed usage instructions and setup.
+
+---
 ## [Input Handlers](input-handlers/README.md)
 
 | Component | Description | Usage |
