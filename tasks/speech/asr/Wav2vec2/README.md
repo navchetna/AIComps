@@ -1,59 +1,51 @@
-# ASR API Endpoint
+# ASR Model deployment using Servoc
+
 
 ## Setup
-
-1. Create and the environment 
-    ```uv sync```
-2. Select tcmalloc as the memory allocator
+1. Clone the Servoc repository
+    ```bash
+    https://github.com/AdityaKulshrestha/Servoc.git
     ```
-    sudo apt-get install google-perftools
-   
-    export LD_PRELOAD="/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4"```
-    
-3. export the envs
-    - INPUT_LANGUAGES=hindi
-    - ASR_PAD_OFFSET=200000
-    - DEFAULT_SAMPLING_RATE=16000
-    
+2. Create virtual environment and install dependencies
+    ```bash
+    cd Servoc
+    uv sync --group springlab-wav2vec2
+    ```
+3. Activate the virtual environment
+    ```bash
+    source .venv/bin/activate
+    ```
+4. Run the server
+    ```bash
+    python main.py
+    ```
 
-3. Run the server
-    `uvicorn main:app --host 0.0.0.0 --port 8000`
+## Test the ASR model
 
-## Docker 
 
-1. Build the image
-```
-docker build --build-arg HTTP_PROXY=$HTTP_PROXY --build-arg http_proxy=$http_proxy --build-arg HTTPS_PROXY=$HTTPS_PROXY --build-arg https_proxy=$https_proxy -f Dockerfile -t asr_openai:0.1 .
-```
-
-2. Run the container
-```
-docker run -it --runtime=habana -e HABANA_VISIBLE_DEVICES=4 -e http_proxy=$http_proxy -e https_proxy=$https_proxy --net=host --ipc=host asr_openai:0.1
+### Using cURL
+You can test the deployed ASR model using the following cURL command:
+```bash
+curl -X POST "http://localhost:8080/v1/audio/transcriptions" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@../sample.wav" -F "model=wav2vec2"
 ```
 
-## Testing
-
-- curl
-```curl
-curl http://localhost:8000/v1/audio/transcriptions \
-  -H "Authorization: Bearer None" \
-  -H "Content-Type: multipart/form-data" \
-  -F file="@/path/to/file/audio.mp3" \
-  -F model="wav2vec"
-```
-
-- openai python sdk
+### Using Python script (OpenAI Client)
+You can also use the following Python script to test the ASR model:
 ```python
-from openai import OpenAI
+import openai
+openai.api_base = "http://localhost:8080/v1"
+openai.api_key = "your_api_key"
 
-client = OpenAI(base_url="http://localhost:8000/v1", api_key="none")
-audio_file= open("audio.wav", "rb")
+audio_file_path = "path_to_your_audio_file.wav"
 
-transcription = client.audio.transcriptions.create(
-    model="wav2vec", 
-    file=audio_file
-)
-
-print(transcription.text)
-
+with open(audio_file_path, "rb") as audio_file:
+    transcript = openai.Audio.transcribe(
+        model="wav2vec2",
+        file=audio_file
+    )       
+print(transcript)
 ```
+
+
+## Important Notes
+1. If the port is already in use, you can change it by modifying the `port` variable under ServerConfig in the `Servoc/app/config.py` file.
