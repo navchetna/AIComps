@@ -1,4 +1,6 @@
+import argparse
 import os
+import sys
 import time
 from typing import Union
 
@@ -23,6 +25,19 @@ from AIComps.tasks.text.dataprep.src.utils import create_upload_folder
 logger = CustomLogger("opea_dataprep_microservice")
 logflag = os.getenv("LOGFLAG", False)
 upload_folder = "./uploaded_files/"
+
+# Parse CLI arguments early to determine port before decorators are evaluated
+def _get_port():
+    """Get port from CLI args or environment variable"""
+    default_port = int(os.getenv("DATAPREP_PORT", 5000))
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description="OPEA Dataprep Microservice", add_help=False)
+        parser.add_argument("--port", type=int, default=default_port)
+        args, _ = parser.parse_known_args()
+        return args.port
+    return default_port
+
+DATAPREP_PORT = _get_port()
 
 dataprep_component_name = os.getenv("DATAPREP_COMPONENT_NAME", "OPEA_DATAPREP_QDRANT")
 # Initialize OpeaComponentLoader
@@ -89,7 +104,7 @@ async def resolve_dataprep_request(request: Request):
     service_type=ServiceType.DATAPREP,
     endpoint="/v1/dataprep/ingest",
     host="0.0.0.0",
-    port=5000,
+    port=DATAPREP_PORT,
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def ingest_files(
@@ -135,7 +150,7 @@ async def ingest_files(
     service_type=ServiceType.DATAPREP,
     endpoint="/v1/dataprep/get",
     host="0.0.0.0",
-    port=5000,
+    port=DATAPREP_PORT,
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def get_files(
@@ -179,7 +194,7 @@ async def get_files(
     service_type=ServiceType.DATAPREP,
     endpoint="/v1/dataprep/delete",
     host="0.0.0.0",
-    port=5000,
+    port=DATAPREP_PORT,
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def delete_files(
@@ -224,7 +239,7 @@ async def delete_files(
     service_type=ServiceType.DATAPREP,
     endpoint="/v1/dataprep/collections",
     host="0.0.0.0",
-    port=5000,
+    port=DATAPREP_PORT,
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def get_list_of_collections(
@@ -256,7 +271,7 @@ async def get_list_of_collections(
     service_type=ServiceType.DATAPREP,
     endpoint="/v1/dataprep/indices",
     host="0.0.0.0",
-    port=5000,
+    port=DATAPREP_PORT,
 )
 @register_statistics(names=["opea_service@dataprep"])
 async def get_list_of_indices():
@@ -284,6 +299,6 @@ async def get_list_of_indices():
         raise
 
 if __name__ == "__main__":
-    logger.info("OPEA Dataprep Microservice is starting...")
+    logger.info(f"OPEA Dataprep Microservice is starting on port {DATAPREP_PORT}...")
     create_upload_folder(upload_folder)
     opea_microservices["opea_service@dataprep"].start()
