@@ -19,15 +19,19 @@ docker buildx build --build-arg https_proxy=$https_proxy --build-arg http_proxy=
 ```bash
 export GROQ_API_KEY=your_api_key
 docker run -p 8000:8000 -e GROQ_API_KEY=$GROQ_API_KEY -e http_proxy=$http_proxy -e https_proxy=$https_proxy navchetna/groq:latest
+
+# Run with custom port
+docker run -p 9000:9000 -e GROQ_API_KEY=$GROQ_API_KEY -e GROQ_PORT=9000 navchetna/groq:latest
 ```
 
 ### Configuration
 - GROQ_API_KEY: Required to authenticate with Groq.
 - GROQ_MODEL: Optional model override; defaults to `llama-3.1-8b-instant`.
-- Port/Host: The service binds to `0.0.0.0:8000` by default.
+- GROQ_PORT: Optional port override; defaults to `8000`.
+- GROQ_HOST: Optional host override; defaults to `0.0.0.0`.
 
-### Client Script
-You can also run the service directly via the Python script:
+### Development Setup
+You can run the service directly via the Python script:
 
 ```bash
 cd AIComps/model-serving/groq
@@ -41,11 +45,22 @@ uv pip install -r requirements.txt
 export GROQ_API_KEY=your_api_key
 export GROQ_MODEL=llama-3.1-8b-instant
 
-# Run the service
+# Run the service (default: port 8000, host 0.0.0.0)
+python main.py
+
+# Run with custom port via CLI argument
+python main.py 9000
+
+# Run with custom port and host via CLI arguments
+python main.py 9000 127.0.0.1
+
+# Run with environment variables
+export GROQ_PORT=9000
+export GROQ_HOST=127.0.0.1
 python main.py
 ```
 
-This starts the server on `http://localhost:8000` and exposes `/v1/chat/completions`.
+**Note:** CLI arguments take priority over environment variables. The service will be available at `http://{host}:{port}/v1/chat/completions`.
 
 
 ### Test the service:

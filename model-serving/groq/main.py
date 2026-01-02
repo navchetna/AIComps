@@ -1,8 +1,9 @@
+import json
+import os
+import sys
 from groq import Groq
 from fastapi import Request
 from fastapi.responses import StreamingResponse
-import json
-import os
 
 from AIComps.tasks import  MicroService, ServiceRoleType
 from AIComps.tasks.cores.proto.api_protocol import (
@@ -144,5 +145,15 @@ class GroqService:
         yield "data: [DONE]\n\n"
 
 if __name__ == "__main__":
-    groq_service = GroqService(port=8000)
+    # Get port from CLI arg or ENV var or default
+    port = int(os.getenv("GROQ_PORT", 8000))
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    
+    # Get host from CLI arg or ENV var or default
+    host = os.getenv("GROQ_HOST", "0.0.0.0")
+    if len(sys.argv) > 2:
+        host = sys.argv[2]
+    
+    groq_service = GroqService(host=host, port=port)
     groq_service.start()
