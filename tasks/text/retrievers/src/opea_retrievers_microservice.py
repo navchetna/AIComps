@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+import argparse
 import os
 import time
 from typing import Union
@@ -35,6 +36,18 @@ from AIComps.tasks.cores.proto.api_protocol import (
 logger = CustomLogger("opea_retrievers_microservice")
 logflag = os.getenv("LOGFLAG", False)
 
+def _get_port():
+    """Get port from CLI args or environment variable"""
+    default_port = int(os.getenv("RETRIEVER_PORT", 7000))
+    if __name__ == "__main__":
+        parser = argparse.ArgumentParser(description="OPEA Retriever Microservice", add_help=False)
+        parser.add_argument("--port", type=int, default=default_port)
+        args, _ = parser.parse_known_args()
+        return args.port
+    return default_port
+
+RETRIEVER_PORT = _get_port()
+
 retriever_component_name = os.getenv("RETRIEVER_COMPONENT_NAME", "OPEA_RETRIEVER_QDRANT")
 # Initialize OpeaComponentLoader
 loader = OpeaComponentLoader(
@@ -48,7 +61,7 @@ loader = OpeaComponentLoader(
     service_type=ServiceType.RETRIEVER,
     endpoint="/v1/retrieval",
     host="0.0.0.0",
-    port=7000,
+    port=RETRIEVER_PORT,
 )
 @register_statistics(names=["opea_service@retrievers"])
 async def retrieve_docs(
@@ -107,5 +120,5 @@ async def retrieve_docs(
 
 
 if __name__ == "__main__":
-    logger.info("OPEA Retriever Microservice is starting...")
+    logger.info(f"OPEA Retriever Microservice is starting on port {RETRIEVER_PORT}...")
     opea_microservices["opea_service@retrievers"].start()
