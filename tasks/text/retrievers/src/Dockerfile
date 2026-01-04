@@ -18,6 +18,7 @@ RUN useradd -m -s /bin/bash user && \
 
 COPY __init__.py /home/user/AIComps/__init__.py
 COPY tasks/__init__.py /home/user/AIComps/tasks/__init__.py
+COPY tasks/version.py /home/user/AIComps/tasks/version.py
 COPY tasks/cores /home/user/AIComps/tasks/cores
 COPY tasks/text/retrievers /home/user/AIComps/tasks/text/retrievers
 

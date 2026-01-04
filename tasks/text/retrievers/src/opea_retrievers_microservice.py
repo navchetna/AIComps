@@ -8,7 +8,7 @@ from typing import Union
 
 
 # import for retrievers component registration
-from .integrations.qdrant import OpeaQDrantRetriever
+from AIComps.tasks.text.retrievers.src.integrations.qdrant import OpeaQDrantRetriever
 
 from AIComps.tasks import (
     CustomLogger,
