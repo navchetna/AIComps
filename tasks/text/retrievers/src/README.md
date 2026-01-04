@@ -59,7 +59,7 @@ For local development without Docker, follow these steps:
 Install the retriever-specific dependencies:
 ```bash
 cd AIComps/tasks/text/retrievers
-uv pip install -r src/requirements.txt
+uv pip install -r src/requirements-cpu.txt
 ```
 
 ### Setup Environment Variables
