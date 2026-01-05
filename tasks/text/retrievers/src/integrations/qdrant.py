@@ -29,8 +29,8 @@ class OpeaQDrantRetriever(OpeaComponent):
 
     def _initialize_client(self, collection_name: str, host: str = None, port: int = None) -> tuple:
         """Initializes the qdrant document store and retriever for a specific collection."""
-        qdrant_host = host or os.getenv("QDRANT_HOST")
-        qdrant_port = port or os.getenv("QDRANT_PORT")
+        qdrant_host = host or QDRANT_HOST
+        qdrant_port = port or QDRANT_PORT
 
         qdrant_store = QdrantDocumentStore(
             host=qdrant_host,
