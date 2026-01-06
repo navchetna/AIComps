@@ -25,8 +25,9 @@
 
 ### Using cURL
 You can test the deployed ASR model using the following cURL command:
+> This command uses a sample wav file present in the AIComps dir, you can replace this with your audio file too
 ```bash
-curl -X POST "http://localhost:8080/v1/audio/transcriptions" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@../sample.wav" -F "model=wav2vec2"
+curl -X POST "http://localhost:8080/v1/audio/transcriptions" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@AIComps/tasks/speech/asr/Wav2vec2/sample.wav" -F "model=wav2vec2"
 ```
 
 ### Using Python script (OpenAI Client)
