@@ -387,7 +387,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.127.0" },
+    { name = "fastapi", specifier = "==0.127.0" },
     { name = "indictranstoolkit", git = "https://github.com/VarunGumma/IndicTransToolkit" },
     { name = "intel-extension-for-pytorch", specifier = "==2.8.0" },
     { name = "loguru", specifier = ">=0.7.3" },
