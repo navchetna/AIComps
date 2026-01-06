@@ -31,9 +31,9 @@ uv pip install -r requirements.txt
 
 ### Step 4: Run the Server
 
+> This translation model is gated, please gain access and then export your token: *[IndicTrans2 Model Card](https://huggingface.co/ai4bharat/indictrans2-indic-indic-1B)*
 ```bash
 cd ..
-# This translation model is gated, please gain access and then export your token
 export HF_TOKEN=<your_token>
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
