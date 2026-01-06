@@ -30,7 +30,7 @@ docker build -f Dockerfile -t tts_openai:0.1 .
 
 2. Run the container
 ```bash
-docker up -d -p 8000:8000 --name fastspeech2_hs tts_openai:0.1
+docker run -d -p 8000:8000 --name fastspeech2_hs tts_openai:0.1
 ```
 
 ## Testing
