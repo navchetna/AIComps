@@ -42,6 +42,6 @@ The Embeddings Microservice supports multiple implementation options to suit dif
 | ------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
 | **With OVMS**                   | Embedding microservice using OpenVINO Model Server (OVMS)       | [README_OVMS](src/README/README_ovms.md)                       |
 | **With TEI**                    | TEI-based embedding microservice for efficient text processing  | [README_TEI](src/README/README_tei.md)                         |
-| **With Multimodal CLIP**        | Multimodal embedding service using CLIP for text and image data | [README_CLIP](src/README/README_clip.md)                       |
-| **With Multimodal BridgeTower** | Multimodal embedding service using BridgeTower                  | [README_BridgeTower](src/README/README_bridgetower.md)         |
+<!-- | **With Multimodal CLIP**        | Multimodal embedding service using CLIP for text and image data | [README_CLIP](src/README/README_clip.md)                       |
+| **With Multimodal BridgeTower** | Multimodal embedding service using BridgeTower                  | [README_BridgeTower](src/README/README_bridgetower.md)         | -->
 <!-- | **With Prediction Guard**       | Embedding service using Prediction Guard with safety filters    | [README_PredictionGuard](src/README_predictionguard.md) | -->
