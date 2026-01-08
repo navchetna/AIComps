@@ -14,6 +14,7 @@ Production‑ready, modular AI components to accelerate document and text proces
 | [Input Handlers](input-handlers/README.md) | Ingest and prepare inputs (PDFs, web pages) | PDF parsing client + viewer tooling | [README](input-handlers/README.md) |
 | [Model Serving](model-serving/README.md) | LLM and model inference services | Serving engines: Groq, vLLM, Ollama | [README](model-serving/README.md) |
 | [Tasks/Services](tasks/README.md) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements | [README](tasks/README.md) |
+| [Models](models/README.md) | Embedding and reranking microservices | Multiple backend options: OVMS, TEI | [README](models/README.md) |
 | [Reusable Comps](comps/README.md) | Standalone microservices/utilities (e.g., vector store) | K8s manifests and Dockerfiles included | [README](comps/README.md) |
 
 Here's what each of the layers include, with links to the relevant READMEs.
@@ -110,11 +111,13 @@ See component‑level docs: [comps/vector-store/README.md](comps/vector-store/RE
 <!-- 
 --- -->
 
-## Models
+## [Models](models/README.md)
 
-| Area | Purpose | Usage |
+Microservices for semantic search and RAG workflows, providing embedding generation and document reranking capabilities.
+
+| Service | Description | Usage |
 | --- | --- | --- |
-| Embedding | Efficiently convert textual strings into vectorized embeddings | - | 
-| Re‑ranking | Semantically reorder retrieved documents by relevance to a query | - | 
+| Embeddings | Convert text into vector embeddings using OVMS or TEI backends | [README](models/embeddings/README.md) |
+| Rerankings | Reorder retrieved documents by semantic relevance to a query | [README](models/rerankings/README.md) |
 
 ---
