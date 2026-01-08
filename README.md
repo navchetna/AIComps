@@ -15,7 +15,6 @@ Production‑ready, modular AI components to accelerate document and text proces
 | [Model Serving](model-serving/README.md) | LLM and model inference services | Serving engines: Groq, vLLM, Ollama | [README](model-serving/README.md) |
 | [Tasks/Services](tasks/README.md) | Domain tasks (dataprep, retrievers, summarization, tagging) | Each task has its own Dockerfile/requirements | [README](tasks/README.md) |
 | [Models](models/README.md) | Embedding and reranking microservices | Multiple backend options: OVMS, TEI | [README](models/README.md) |
-| [Reusable Comps](comps/README.md) | Standalone microservices/utilities (e.g., vector store) | K8s manifests and Dockerfiles included | [README](comps/README.md) |
 
 Here's what each of the layers include, with links to the relevant READMEs.
 
