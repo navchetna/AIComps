@@ -43,9 +43,10 @@ python export_model.py embeddings --source_model BAAI/bge-large-en-v1.5 --weight
 Run OVMS service container with model volume mounted and port mapping:
 
 ```bash
-your_port=8090
-docker run -p $your_port:8080 -v ./models:/models --name ovms-embedding-serving \
-openvino/model_server:2025.0 --port 8000 --rest_port 8080 --rest_workers 16 --config_path /models/config_embeddings.json
+grpc_port=8090
+rest_port=8091
+docker run --rm -d -p $grpc_port:8080 -p $rest_port:8091 -v ./models:/models --name ovms-embedding-serving \
+openvino/model_server:2025.0 --port $grpc_port --rest_port $rest_port --rest_workers 16 --config_path /models/config_embeddings.json
 ```
 
 ### Test OVMS Service
@@ -53,7 +54,7 @@ openvino/model_server:2025.0 --port 8000 --rest_port 8080 --rest_workers 16 --co
 Run the following command to check if the service is up and running.
 
 ```bash
-your_port=8090
+your_port=8091
 curl http://localhost:$your_port/v3/embeddings \
 -X POST \
 -H 'Content-Type: application/json' \
@@ -78,6 +79,7 @@ curl http://localhost:$your_port/v3/embeddings \
 
    ```bash
    export MODEL_ID=BAAI/bge-large-en-v1.5
+   export ovms_server_port=8091
    export OVMS_EMBEDDING_ENDPOINT=http://<ovms_server_host>:<ovms_server_port>
    docker run -d --name="embedding-ovms-server" \
    -p 6000:6000 \
