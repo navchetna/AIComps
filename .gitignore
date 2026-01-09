@@ -2,6 +2,9 @@
 # Cache directories
 .cache/
 *cache*
+__pycache__/
+*.pyc
+*.egg-info/
 
 # VS Code
 .vscode/
