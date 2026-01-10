@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  pdf-parser:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pdf-parser-api
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      # LLM Configuration
+      - USE_LLM=${USE_LLM:-false}
+      - VLLM_URL=${VLLM_URL:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-dummy-key-for-vllm}
+      
+      # OCR and Image Configuration
+      - FORCE_OCR=${FORCE_OCR:-false}
+      - EXTRACT_IMAGE=${EXTRACT_IMAGE:-false}
+      
+      # Output Configuration
+      - OUTPUT_DIR=${OUTPUT_DIR:-/app/outputs}
+      
+      # Server Configuration
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8000}
+    volumes:
+      # Mount output directory to persist parsed results
+      - ./outputs:/app/outputs
+      # Optional: Mount uploads directory for debugging
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

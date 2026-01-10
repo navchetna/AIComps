@@ -7,7 +7,7 @@ import os from 'os';
 
 // Use environment variable or fall back to home directory
 const baseDir = process.env.PDF_RESULTS_DIR || path.join(os.homedir(), 'pdf-results');
-export const OUTPUTS_DIR = path.join(baseDir, 'ervin', 'outputs');
+export const OUTPUTS_DIR = baseDir
 
 // PDFs directory - defaults to frontend's public/pdfs folder
 export const PDFS_DIR = process.env.PDFS_DIR || '/home/ritik-intel/ervin/ONGC-pdfs';
